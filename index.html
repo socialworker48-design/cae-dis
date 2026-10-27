@@ -34,7 +34,7 @@
     .calendar-cell { min-height: 175px; transition: background-color 0.15s ease; }
     .calendar-cell:hover { background-color: #f8fafc; }
 
-    /* 연가 관리 FullCalendar 커스텀 스타일 */
+    /* 연가 관리 FullCalendar 커스텀 스타일 (모바일 줄바꿈 및 반응형 개선) */
     .fc-event {
       cursor: pointer;
       border-radius: 4px;
@@ -42,6 +42,19 @@
       font-size: 0.78rem;
       font-weight: 500;
       line-height: 1.3;
+    }
+    /* 달력 내 일정 텍스트가 잘리지 않고 여러 줄로 자연스럽게 줄바꿈되도록 처리 */
+    .fc-daygrid-event {
+      white-space: normal !important;
+      align-items: flex-start !important;
+    }
+    .fc-event-main,
+    .fc-event-title,
+    .fc-list-event-title {
+      white-space: normal !important;
+      word-break: keep-all !important;
+      overflow-wrap: break-word !important;
+      line-height: 1.3 !important;
     }
     .fc .fc-button-primary {
       background-color: #4f46e5 !important;
@@ -52,6 +65,10 @@
     .fc .fc-button-primary:hover {
       background-color: #4338ca !important;
       border-color: #4338ca !important;
+    }
+    .fc .fc-button-primary:not(:disabled).fc-button-active {
+      background-color: #312e81 !important;
+      border-color: #312e81 !important;
     }
     .fc .fc-toolbar-title {
       font-size: 1.25rem !important;
@@ -64,6 +81,34 @@
     }
     .fc-daygrid-day:hover {
       background-color: #f8fafc;
+    }
+
+    /* 모바일 작은 화면(640px 이하)에서 FullCalendar 툴바 및 폰트 최적화 */
+    @media (max-width: 640px) {
+      .fc .fc-header-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+      .fc .fc-toolbar-chunk {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .fc .fc-toolbar-title {
+        font-size: 1.05rem !important;
+      }
+      .fc .fc-button {
+        padding: 0.3rem 0.55rem !important;
+        font-size: 0.75rem !important;
+      }
+      .fc-event {
+        font-size: 0.7rem !important;
+        padding: 1px 3px !important;
+      }
+      .fc .fc-daygrid-day-top {
+        font-size: 0.75rem;
+      }
     }
 
     /* 하단 토스트 메시지 (연가용 호환) */
@@ -93,12 +138,18 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* A4 인쇄 전용 스타일 (차량 배차 월별 내역서 출력용) */
+    /* A4 인쇄 전용 스타일 (연가 내역서 & 차량 배차 내역서 모두 지원) */
     @media print {
-      html { font-size: 14px !important; }
+      html { font-size: 13px !important; }
       body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea {
+      .no-print { display: none !important; }
+
+      /* 연가 내역서 인쇄 모드 */
+      body.printing-leave #leavePrintArea,
+      body.printing-leave #leavePrintArea * {
+        visibility: visible;
+      }
+      body.printing-leave #leavePrintArea {
         position: absolute;
         left: 0;
         top: 0;
@@ -108,7 +159,23 @@
         background: white !important;
         box-shadow: none !important;
       }
-      .no-print { display: none !important; }
+
+      /* 차량 배차 내역서 인쇄 모드 (기본 호환 포함) */
+      body:not(.printing-leave) #printArea,
+      body:not(.printing-leave) #printArea * {
+        visibility: visible;
+      }
+      body:not(.printing-leave) #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        box-shadow: none !important;
+      }
+
       table { page-break-inside: auto; width: 100%; border-collapse: collapse; }
       tr { page-break-inside: avoid; page-break-after: auto; }
       thead { display: table-header-group; }
@@ -181,15 +248,20 @@
           <h1 class="text-2xl md:text-3xl font-bold text-gray-800">연천군정신건강복지센터 연가 및 대체휴무 관리</h1>
           <p class="text-gray-500 mt-1 text-sm md:text-base">Since 1995 | 실시간 클라우드 동기화 됨 (점심시간 12:00~13:00 자동 미차감 지원)</p>
         </div>
-        <div class="flex flex-wrap gap-2 text-xs text-gray-600 bg-white px-3.5 py-2.5 rounded-xl border border-gray-200 shadow-xs">
-          <span class="font-bold text-gray-700">구분 안내:</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>연가(연가차감)</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>대체휴무 발생(+적립)</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>대체휴무 사용(-차감)</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>공가</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-600 inline-block"></span>교육공가</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>검진공가</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>비공식 연가</span>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button onclick="openLeaveReportModal()" class="inline-flex items-center gap-2 text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm transition cursor-pointer">
+            <i class="fa-solid fa-print"></i> 월별 연가 내역 출력 / 엑셀
+          </button>
+          <div class="flex flex-wrap gap-2 text-xs text-gray-600 bg-white px-3.5 py-2.5 rounded-xl border border-gray-200 shadow-xs">
+            <span class="font-bold text-gray-700">구분 안내:</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>연가(연가차감)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>대체휴무 발생(+적립)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>대체휴무 사용(-차감)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>공가</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-600 inline-block"></span>교육공가</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>검진공가</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>비공식 연가</span>
+          </div>
         </div>
       </div>
 
@@ -264,14 +336,21 @@
       </div>
 
       <!-- 연가 캘린더 영역 -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-10">
+      <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 mb-10">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
           <div>
-            <h2 class="text-xl font-bold text-gray-700">전체 연가 및 근무 일정표</h2>
-            <p class="text-xs text-indigo-600 font-medium mt-1">* 달력의 날짜 칸을 클릭(또는 드래그)하면 해당 날짜로 바로 연가/대체휴무/공가를 입력할 수 있습니다.</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-xl font-bold text-gray-700">전체 연가 및 근무 일정표</h2>
+              <!-- 모바일/좁은 화면용 빠른 보기 전환 버튼 -->
+              <div class="inline-flex sm:hidden bg-gray-100 p-0.5 rounded-lg border border-gray-200 text-xs">
+                <button type="button" onclick="changeLeaveCalendarView('dayGridMonth')" class="px-2.5 py-1 rounded-md font-bold text-gray-700 hover:bg-white">달력형</button>
+                <button type="button" onclick="changeLeaveCalendarView('listMonth')" class="px-2.5 py-1 rounded-md font-bold text-indigo-700 bg-white shadow-2xs">목록형(추천)</button>
+              </div>
+            </div>
+            <p class="text-xs text-indigo-600 font-medium mt-1">* 날짜 칸을 클릭(또는 드래그)하면 바로 일정을 입력할 수 있습니다. 모바일에서는 우측 상단 <b>[목록]</b> 보기를 누르면 글씨 잘림 없이 한눈에 보입니다.</p>
           </div>
           <!-- 색상 범례 (Legend) -->
-          <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-medium">
             <span class="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-200">
               <span class="w-3 h-3 rounded-sm bg-[#4f46e5] inline-block"></span> 연가 (차감)
             </span>
@@ -295,7 +374,7 @@
             </span>
           </div>
         </div>
-        <div id="calendar" class="min-h-[550px]"></div>
+        <div id="calendar" class="min-h-[520px]"></div>
       </div>
     </div>
 
@@ -693,6 +772,98 @@
     </div>
   </section>
 
+  <!-- ===============================================================
+       월별 연가 및 근무 내역서 조회 / A4 인쇄 / 엑셀(CSV) 다운로드 모달
+       (인쇄 시 #leavePrintArea가 정상 출력되도록 section 외부에 배치)
+       =============================================================== -->
+  <div id="leaveReportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-3 sm:p-6">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-200">
+      <!-- 모달 상단 액션바 (인쇄 시 숨김) -->
+      <div class="px-5 sm:px-6 py-4 bg-indigo-900 text-white flex flex-wrap justify-between items-center gap-3 no-print">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-file-contract text-indigo-300 text-xl"></i>
+          <h3 class="font-extrabold text-base sm:text-xl">월별 직원 연가 및 근무 내역서 조회·출력</h3>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="exportLeaveMonthlyCSV()" class="px-3.5 sm:px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs">
+            <i class="fa-solid fa-file-excel"></i> 엑셀(CSV) 다운로드
+          </button>
+          <button onclick="printLeaveReport()" class="px-3.5 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs">
+            <i class="fa-solid fa-print"></i> A4 인쇄 / PDF 저장
+          </button>
+          <button onclick="closeLeaveReportModal()" class="w-9 h-9 rounded-lg bg-indigo-800 hover:bg-indigo-700 text-indigo-200 flex items-center justify-center transition cursor-pointer ml-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 필터 컨트롤 바 (인쇄 시 숨김) -->
+      <div class="px-5 sm:px-6 py-3.5 bg-slate-100 border-b border-slate-200 flex flex-wrap justify-between items-center gap-3 text-sm no-print">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- 월 선택 -->
+          <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-xl px-2 py-1">
+            <button type="button" onclick="shiftLeaveReportMonth(-1)" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-600 flex items-center justify-center cursor-pointer" title="이전 달">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <input type="month" id="leaveReportMonth" onchange="renderLeaveReportTable()" class="text-sm font-extrabold text-slate-800 outline-none px-1 cursor-pointer">
+            <button type="button" onclick="shiftLeaveReportMonth(1)" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-600 flex items-center justify-center cursor-pointer" title="다음 달">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+
+          <!-- 직원 필터 -->
+          <select id="leaveReportEmpFilter" onchange="renderLeaveReportTable()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+            <option value="ALL">👤 전체 직원</option>
+          </select>
+
+          <!-- 유형 필터 -->
+          <select id="leaveReportTypeFilter" onchange="renderLeaveReportTable()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+            <option value="USE_ALL">📋 전체 휴가·공가 사용 내역 (적립 제외)</option>
+            <option value="LEAVE_ONLY">🔵 공식 연가(차감)만</option>
+            <option value="COMP_USE">🟠 대체휴무 사용(차감)만</option>
+            <option value="OTHER_NON_DEDUCT">🟢 공가·교육·검진·비공식(미차감)만</option>
+            <option value="COMP_ADD">➕ 대체휴무 발생(적립) 내역만</option>
+            <option value="ALL">🗂️ 모든 기록 (사용 + 적립 전체)</option>
+          </select>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <span id="leaveReportTotalBadge" class="font-extrabold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-200 text-xs sm:text-sm">
+            총 0건 (합계 0시간)
+          </span>
+        </div>
+      </div>
+
+      <!-- 인쇄 영역 (#leavePrintArea) -->
+      <div id="leavePrintArea" class="p-5 sm:p-8 overflow-y-auto flex-1 bg-white">
+        <div class="text-center mb-6 border-b-2 border-slate-800 pb-4">
+          <h1 id="leavePrintDocTitle" class="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">2026년 10월 직원 연가 및 근무 상황 내역서</h1>
+          <p id="leavePrintDocSub" class="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">기관명: 연천군정신건강복지센터 | 출력일: 2026-10-27 | 조회대상: 전체 직원</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse border border-slate-300 text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-slate-100 text-slate-900 font-extrabold border-b border-slate-300">
+                <th class="border border-slate-300 px-2.5 py-2.5 text-center w-12">연번</th>
+                <th class="border border-slate-300 px-3 py-2.5 text-center w-24">성명</th>
+                <th class="border border-slate-300 px-3 py-2.5 text-center w-28">구분</th>
+                <th class="border border-slate-300 px-2.5 py-2.5 text-center w-24">차감구분</th>
+                <th class="border border-slate-300 px-3 py-2.5 text-center w-44">사용기간 / 일자</th>
+                <th class="border border-slate-300 px-3 py-2.5 text-center w-28">시간대</th>
+                <th class="border border-slate-300 px-3 py-2.5 text-center w-24">시간</th>
+                <th class="border border-slate-300 px-3 py-2.5">사유 및 상세내용</th>
+              </tr>
+            </thead>
+            <tbody id="leaveReportTableBody" class="divide-y divide-slate-200 text-slate-800">
+              <!-- JS로 렌더링 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- =================================================================
        [탭 2] 실시간 차량 배차 관리 섹션 (jeung-car 연결)
        ================================================================= -->
@@ -828,24 +999,24 @@
                   <span class="flex items-center gap-1.5 text-orange-800 bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-200">
                     <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> 오후(PM)
                   </span>
+            <!-- 요일 헤더 & 달력 날짜 그리드 (모바일 가로 스크롤 지원) -->
+            <div class="overflow-x-auto">
+              <div class="min-w-[760px]">
+                <div class="calendar-grid bg-slate-100/90 border-b border-slate-200 text-center py-3 text-sm sm:text-base font-extrabold text-slate-700">
+                  <div class="text-red-500">일</div>
+                  <div>월</div>
+                  <div>화</div>
+                  <div>수</div>
+                  <div>목</div>
+                  <div>금</div>
+                  <div class="text-blue-600">토</div>
+                </div>
+
+                <!-- 달력 날짜 그리드 -->
+                <div id="calendarGrid" class="calendar-grid divide-x divide-y divide-slate-200">
+                  <!-- JS로 렌더링 -->
                 </div>
               </div>
-            </div>
-
-            <!-- 요일 헤더 -->
-            <div class="calendar-grid bg-slate-100/90 border-b border-slate-200 text-center py-3 text-sm sm:text-base font-extrabold text-slate-700">
-              <div class="text-red-500">일</div>
-              <div>월</div>
-              <div>화</div>
-              <div>수</div>
-              <div>목</div>
-              <div>금</div>
-              <div class="text-blue-600">토</div>
-            </div>
-
-            <!-- 달력 날짜 그리드 -->
-            <div id="calendarGrid" class="calendar-grid divide-x divide-y divide-slate-200">
-              <!-- JS로 렌더링 -->
             </div>
           </div>
         </div>
@@ -993,7 +1164,7 @@
             <button onclick="exportMonthlyCSV()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs">
               <i class="fa-solid fa-file-excel"></i> 엑셀(CSV) 다운로드
             </button>
-            <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs">
+            <button onclick="printCarReport()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs">
               <i class="fa-solid fa-print"></i> A4 인쇄 / PDF 저장
             </button>
             <button onclick="closeReportModal()" class="w-9 h-9 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 flex items-center justify-center transition cursor-pointer ml-1">
@@ -1372,15 +1543,23 @@
       initTimeSelectOptions();
 
       const calendarEl = document.getElementById('calendar');
+      // 모바일(폭 640px 이하) 접속 시 글씨 잘림이 전혀 없는 목록형을 기본 또는 쉽게 전환할 수 있도록 지원
       calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'ko',
         selectable: true,
         unselectAuto: true,
+        dayMaxEvents: false,
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,dayGridWeek'
+          right: 'dayGridMonth,dayGridWeek,listMonth'
+        },
+        buttonText: {
+          today: '오늘',
+          month: '월간',
+          week: '주간',
+          list: '목록'
         },
         contentHeight: 'auto',
         events: [],
@@ -1424,6 +1603,13 @@
       calendar.render();
       window.leaveCalendarInstance = calendar;
     });
+
+    // 모바일용 빠른 캘린더 뷰 전환 함수
+    window.changeLeaveCalendarView = function(viewName) {
+      if (calendar) {
+        calendar.changeView(viewName);
+      }
+    };
 
     function updateCalendar() {
       if (!calendar) return;
@@ -2199,6 +2385,237 @@
         }
       });
     };
+
+    /********************************************************************
+     * [월별 연가 및 근무 내역서 조회 / A4 인쇄 / 엑셀(CSV) 다운로드]
+     ********************************************************************/
+    function getRecordYearMonths(record) {
+      const rawDate = record.dateStr || record.date || "";
+      if (!rawDate) return [];
+      if (rawDate.includes("~")) {
+        const parts = rawDate.split("~").map(s => s.trim());
+        const ym1 = parts[0].substring(0, 7);
+        const ym2 = (parts[1] || parts[0]).substring(0, 7);
+        return ym1 === ym2 ? [ym1] : [ym1, ym2];
+      }
+      return [rawDate.trim().substring(0, 7)];
+    }
+
+    function getFilteredLeaveReportRecords() {
+      const monthVal = document.getElementById("leaveReportMonth").value;
+      const empFilter = document.getElementById("leaveReportEmpFilter").value;
+      const typeFilter = document.getElementById("leaveReportTypeFilter").value;
+
+      return recordsData
+        .filter(r => {
+          // 1. 해당 연월 포함 여부
+          if (monthVal) {
+            const yms = getRecordYearMonths(r);
+            if (!yms.includes(monthVal)) return false;
+          }
+          // 2. 직원 필터
+          if (empFilter !== "ALL" && r.empId !== empFilter) return false;
+
+          // 3. 유형 필터
+          const normType = normalizeLeaveType(r.leaveType);
+          if (typeFilter === "USE_ALL") {
+            return normType !== "대체휴무 발생";
+          } else if (typeFilter === "LEAVE_ONLY") {
+            return normType === "연가";
+          } else if (typeFilter === "COMP_USE") {
+            return normType === "대체휴무 사용";
+          } else if (typeFilter === "OTHER_NON_DEDUCT") {
+            return normType !== "연가" && normType !== "대체휴무 사용" && normType !== "대체휴무 발생";
+          } else if (typeFilter === "COMP_ADD") {
+            return normType === "대체휴무 발생";
+          }
+          return true; // 'ALL'
+        })
+        .sort((a, b) => {
+          const dA = (a.dateStr || a.date || "").split("~")[0].trim();
+          const dB = (b.dateStr || b.date || "").split("~")[0].trim();
+          if (dA !== dB) return dA.localeCompare(dB);
+          return (a.createdAt || 0) - (b.createdAt || 0);
+        });
+    }
+
+    window.openLeaveReportModal = function() {
+      // 기본 연월을 현재 달력 연월(또는 당월)로 세팅
+      const monthInput = document.getElementById("leaveReportMonth");
+      if (!monthInput.value) {
+        if (calendar) {
+          const calDate = calendar.getDate();
+          const yyyy = calDate.getFullYear();
+          const mm = String(calDate.getMonth() + 1).padStart(2, "0");
+          monthInput.value = `${yyyy}-${mm}`;
+        } else {
+          monthInput.value = new Date().toISOString().substring(0, 7);
+        }
+      }
+
+      // 직원 필터 옵션 갱신
+      const empSelect = document.getElementById("leaveReportEmpFilter");
+      const prevVal = empSelect.value || "ALL";
+      empSelect.innerHTML = `<option value="ALL">👤 전체 직원</option>` +
+        employeesData.map(e => `<option value="${e.id}">${e.name} 선생님</option>`).join("");
+      if (employeesData.some(e => e.id === prevVal)) {
+        empSelect.value = prevVal;
+      } else {
+        empSelect.value = "ALL";
+      }
+
+      renderLeaveReportTable();
+      const modal = document.getElementById("leaveReportModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    };
+
+    window.closeLeaveReportModal = function() {
+      const modal = document.getElementById("leaveReportModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    };
+
+    window.shiftLeaveReportMonth = function(delta) {
+      const monthInput = document.getElementById("leaveReportMonth");
+      let [y, m] = (monthInput.value || new Date().toISOString().substring(0, 7)).split("-").map(Number);
+      const d = new Date(y, m - 1 + delta, 1);
+      const ny = d.getFullYear();
+      const nm = String(d.getMonth() + 1).padStart(2, "0");
+      monthInput.value = `${ny}-${nm}`;
+      renderLeaveReportTable();
+    };
+
+    window.renderLeaveReportTable = function() {
+      const monthVal = document.getElementById("leaveReportMonth").value || new Date().toISOString().substring(0, 7);
+      const [yearStr, monthStr] = monthVal.split("-");
+      const empFilter = document.getElementById("leaveReportEmpFilter").value;
+      const typeFilterSelect = document.getElementById("leaveReportTypeFilter");
+      const typeFilterLabel = typeFilterSelect.options[typeFilterSelect.selectedIndex]?.text.replace(/^[^\s]+\s/, "") || "전체";
+
+      const empObj = employeesData.find(e => e.id === empFilter);
+      const empLabel = empFilter === "ALL" ? "전체 직원" : `${empObj ? empObj.name : ""} 선생님`;
+
+      const list = getFilteredLeaveReportRecords();
+      const totalMins = list.reduce((sum, r) => sum + (r.usedMins || 0), 0);
+
+      document.getElementById("leaveReportTotalBadge").innerText =
+        `총 ${list.length}건 (합계 ${formatTime(totalMins)})`;
+
+      document.getElementById("leavePrintDocTitle").innerText =
+        `${yearStr}년 ${parseInt(monthStr, 10)}월 직원 연가 및 근무 상황 내역서`;
+
+      const todayStr = new Date().toISOString().substring(0, 10);
+      document.getElementById("leavePrintDocSub").innerText =
+        `기관명: 연천군정신건강복지센터 | 출력일: ${todayStr} | 조회대상: ${empLabel} | 조회구분: ${typeFilterLabel} | 총 ${list.length}건 (${formatTime(totalMins)})`;
+
+      const tbody = document.getElementById("leaveReportTableBody");
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="border border-slate-300 py-10 text-center text-slate-400 font-medium">
+              해당 조건에 등록된 연가 및 근무 내역이 없습니다.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = list.map((r, idx) => {
+        const emp = employeesData.find(e => e.id === r.empId);
+        const empName = emp ? emp.name : "알수없음";
+        const type = normalizeLeaveType(r.leaveType);
+        const cfg = TYPE_CONFIG[type] || TYPE_CONFIG["연가"];
+        const dateDisplay = r.dateStr || r.date || "-";
+        const timeRangeDisplay = r.timeRange || "전일/미지정";
+        const reasonDisplay = r.reason || "-";
+
+        let deductLabel = "미차감";
+        let timeFormatted = formatTime(r.usedMins);
+        if (cfg.mode === "LEAVE_DEDUCT") {
+          deductLabel = "연가차감";
+          timeFormatted = `-${timeFormatted}`;
+        } else if (cfg.mode === "COMP_USE") {
+          deductLabel = "대체휴무차감";
+          timeFormatted = `-${timeFormatted}`;
+        } else if (cfg.mode === "COMP_ADD") {
+          deductLabel = "대체휴무적립";
+          timeFormatted = `+${timeFormatted}`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="border border-slate-300 px-2.5 py-2 text-center font-medium">${idx + 1}</td>
+            <td class="border border-slate-300 px-3 py-2 text-center font-bold text-slate-900 whitespace-nowrap">${empName}</td>
+            <td class="border border-slate-300 px-3 py-2 text-center whitespace-nowrap">
+              <span class="inline-block px-2 py-0.5 rounded text-xs font-bold border ${cfg.badgeClass}">${type}</span>
+            </td>
+            <td class="border border-slate-300 px-2.5 py-2 text-center text-xs font-semibold text-slate-600 whitespace-nowrap">${deductLabel}</td>
+            <td class="border border-slate-300 px-3 py-2 text-center font-semibold whitespace-nowrap">${dateDisplay}</td>
+            <td class="border border-slate-300 px-3 py-2 text-center text-xs font-medium text-indigo-700 whitespace-nowrap">${timeRangeDisplay}</td>
+            <td class="border border-slate-300 px-3 py-2 text-center font-bold whitespace-nowrap">${timeFormatted}</td>
+            <td class="border border-slate-300 px-3 py-2 text-slate-700">${reasonDisplay}</td>
+          </tr>
+        `;
+      }).join("");
+    };
+
+    window.printLeaveReport = function() {
+      document.body.classList.add("printing-leave");
+      window.print();
+      setTimeout(() => {
+        document.body.classList.remove("printing-leave");
+      }, 500);
+    };
+
+    window.exportLeaveMonthlyCSV = function() {
+      const monthVal = document.getElementById("leaveReportMonth").value || new Date().toISOString().substring(0, 7);
+      const [yearStr, monthStr] = monthVal.split("-");
+      const list = getFilteredLeaveReportRecords();
+
+      if (list.length === 0) {
+        showLeaveToast("출력할 월별 연가/근무 내역이 없습니다.");
+        return;
+      }
+
+      const headers = ["연번", "성명", "구분", "차감구분", "사용기간/일자", "시간대", "시간(표기)", "시간(분)", "사유 및 상세내용"];
+      const rows = list.map((r, idx) => {
+        const emp = employeesData.find(e => e.id === r.empId);
+        const empName = emp ? emp.name : "알수없음";
+        const type = normalizeLeaveType(r.leaveType);
+        const cfg = TYPE_CONFIG[type] || TYPE_CONFIG["연가"];
+        let deductLabel = "미차감";
+        if (cfg.mode === "LEAVE_DEDUCT") deductLabel = "연가차감";
+        else if (cfg.mode === "COMP_USE") deductLabel = "대체휴무차감";
+        else if (cfg.mode === "COMP_ADD") deductLabel = "대체휴무적립";
+
+        return [
+          idx + 1,
+          empName,
+          type,
+          deductLabel,
+          r.dateStr || r.date || "",
+          r.timeRange || "전일/미지정",
+          formatTime(r.usedMins),
+          r.usedMins || 0,
+          r.reason || ""
+        ].map(val => `"${String(val ?? "").replace(/"/g, '""')}"`).join(",");
+      });
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `연가및근무내역_${yearStr}년_${monthStr}월.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showLeaveToast(`${yearStr}년 ${monthStr}월 연가 내역 엑셀(CSV) 파일이 다운로드되었습니다.`);
+    };
   </script>
 
   <!-- =================================================================
@@ -2950,6 +3367,11 @@
       modal.classList.remove('flex');
     }
 
+    function printCarReport() {
+      document.body.classList.remove('printing-leave');
+      window.print();
+    }
+
     function exportMonthlyCSV() {
       const year = currentDate.getFullYear();
       const month = String(currentDate.getMonth() + 1).padStart(2, '0');
@@ -3032,7 +3454,7 @@
       updateDefaultTime, saveBooking,
       forceSaveBooking, hideConflictBanner,
       toggleDeleteConfirm, confirmDeleteBooking,
-      openReportModal, closeReportModal, exportMonthlyCSV,
+      openReportModal, closeReportModal, printCarReport, exportMonthlyCSV,
       openGuideModal, closeGuideModal, applyCustomFirebase, fillPresetUrl,
       formatDate
     });
