@@ -33,15 +33,23 @@
     .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
     .calendar-cell { min-height: 175px; transition: background-color 0.15s ease; }
     .calendar-cell:hover { background-color: #f8fafc; }
+    .calendar-cell.drag-over {
+      background-color: #eff6ff !important;
+      outline: 2px dashed #3b82f6;
+      outline-offset: -2px;
+    }
 
     /* 연가 관리 FullCalendar 커스텀 스타일 (모바일 줄바꿈 및 반응형 개선) */
     .fc-event {
-      cursor: pointer;
+      cursor: grab;
       border-radius: 4px;
       padding: 2px 5px;
       font-size: 0.78rem;
       font-weight: 500;
       line-height: 1.3;
+    }
+    .fc-event:active {
+      cursor: grabbing;
     }
     /* 달력 내 일정 텍스트가 잘리지 않고 여러 줄로 자연스럽게 줄바꿈되도록 처리 */
     .fc-daygrid-event {
@@ -348,6 +356,7 @@
               </div>
             </div>
             <p class="text-xs text-indigo-600 font-medium mt-1">* 날짜 칸을 클릭(또는 드래그)하면 바로 일정을 입력할 수 있습니다. 모바일에서는 우측 상단 <b>[목록]</b> 보기를 누르면 글씨 잘림 없이 한눈에 보입니다.</p>
+            <p class="text-xs text-emerald-700 font-semibold mt-0.5">* 달력의 일정을 마우스로 드래그하여 다른 날짜로 바로 이동할 수 있습니다. (우측 끝을 끌어 기간 조절 가능)</p>
           </div>
           <!-- 색상 범례 (Legend) -->
           <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-medium">
@@ -999,6 +1008,14 @@
                   <span class="flex items-center gap-1.5 text-orange-800 bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-200">
                     <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> 오후(PM)
                   </span>
+                </div>
+              </div>
+            </div>
+            <div class="px-4 sm:px-6 py-2 bg-blue-50/60 border-b border-slate-200 text-xs font-semibold text-blue-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-hand-pointer text-blue-600"></i>
+              <span>배차 일정을 마우스로 드래그하여 다른 날짜 칸으로 이동하면 배차 일자가 즉시 변경됩니다.</span>
+            </div>
+
             <!-- 요일 헤더 & 달력 날짜 그리드 (모바일 가로 스크롤 지원) -->
             <div class="overflow-x-auto">
               <div class="min-w-[760px]">
@@ -1539,6 +1556,31 @@
       document.getElementById('compMins').value = String(mins);
     };
 
+    // FullCalendar Date 객체를 YYYY-MM-DD 문자열로 변환하는 보조 함수
+    function formatFCDate(dateObj) {
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // FullCalendar 이벤트 객체에서 시작일~종료일(dateStr) 포맷을 생성하는 함수
+    function buildDateStrFromFCEvent(fcEvent) {
+      if (!fcEvent.start) return '';
+      const startStr = formatFCDate(fcEvent.start);
+      if (!fcEvent.end) return startStr;
+
+      // FullCalendar의 allDay 종료일은 Exclusive(다음 날 00:00)이므로 하루(-1일)를 빼서 실제 종료일 계산
+      const inclusiveEndObj = new Date(fcEvent.end.getTime());
+      inclusiveEndObj.setDate(inclusiveEndObj.getDate() - 1);
+      const endStr = formatFCDate(inclusiveEndObj);
+
+      if (endStr && endStr > startStr) {
+        return `${startStr} ~ ${endStr}`;
+      }
+      return startStr;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       initTimeSelectOptions();
 
@@ -1549,6 +1591,9 @@
         locale: 'ko',
         selectable: true,
         unselectAuto: true,
+        editable: true,
+        eventStartEditable: true,
+        eventDurationEditable: true,
         dayMaxEvents: false,
         headerToolbar: {
           left: 'prev,next today',
@@ -1578,6 +1623,64 @@
             const dd = String(endDateObj.getDate()).padStart(2, '0');
             const inclusiveEndStr = `${yyyy}-${mm}-${dd}`;
             openModalByDate(info.startStr, inclusiveEndStr);
+          }
+        },
+        // 일정을 드래그하여 다른 날짜로 이동했을 때 즉시 날짜 변경 및 저장
+        eventDrop: async function(info) {
+          const recordId = info.event.id;
+          const record = recordsData.find(r => r.id === recordId);
+          if (!record) {
+            info.revert();
+            return;
+          }
+
+          const newDateStr = buildDateStrFromFCEvent(info.event);
+          if (!newDateStr) {
+            info.revert();
+            return;
+          }
+
+          const now = new Date().getTime();
+          try {
+            await updateDoc(doc(db, "leave_records", recordId), {
+              dateStr: newDateStr
+            });
+            if (record.empId) {
+              await updateDoc(doc(db, "employees", record.empId), { updatedAt: now });
+            }
+            showLeaveToast(`일정이 [${newDateStr}]로 이동되었습니다.`);
+          } catch (e) {
+            info.revert();
+            showLeaveToast("일정 이동 중 오류 발생: " + e.message);
+          }
+        },
+        // 일정 막대 우측 끝을 드래그하여 기간(종료일)을 변경했을 때 즉시 반영
+        eventResize: async function(info) {
+          const recordId = info.event.id;
+          const record = recordsData.find(r => r.id === recordId);
+          if (!record) {
+            info.revert();
+            return;
+          }
+
+          const newDateStr = buildDateStrFromFCEvent(info.event);
+          if (!newDateStr) {
+            info.revert();
+            return;
+          }
+
+          const now = new Date().getTime();
+          try {
+            await updateDoc(doc(db, "leave_records", recordId), {
+              dateStr: newDateStr
+            });
+            if (record.empId) {
+              await updateDoc(doc(db, "employees", record.empId), { updatedAt: now });
+            }
+            showLeaveToast(`일정 기간이 [${newDateStr}]로 변경되었습니다.`);
+          } catch (e) {
+            info.revert();
+            showLeaveToast("일정 기간 변경 중 오류 발생: " + e.message);
           }
         },
         eventClick: function(info) {
@@ -3011,7 +3114,10 @@
         if (dayOfWeek === 6) dayColor = "text-blue-600";
 
         html += `
-          <div class="calendar-cell p-2.5 flex flex-col justify-between group relative ${isToday ? 'bg-blue-50/30' : 'bg-white'}">
+          <div class="calendar-cell p-2.5 flex flex-col justify-between group relative ${isToday ? 'bg-blue-50/30' : 'bg-white'}"
+            ondragover="handleCellDragOver(event)"
+            ondragleave="handleCellDragLeave(event)"
+            ondrop="handleBookingDrop(event, '${dateStr}')">
             <div class="flex justify-between items-center mb-2">
               <span class="text-base sm:text-lg font-extrabold ${dayColor} ${isToday ? 'bg-blue-600 text-white px-2.5 py-0.5 rounded-full shadow-xs' : ''}">
                 ${day}
@@ -3060,8 +3166,11 @@
       }
 
       return `
-        <div onclick="openBookingModal('${b.date}', '${b.id}')"
-          class="cursor-pointer p-2.5 rounded-xl border text-xs sm:text-sm leading-snug transition shadow-2xs ${badgeStyle}">
+        <div draggable="true"
+          ondragstart="handleBookingDragStart(event, '${b.id}')"
+          onclick="openBookingModal('${b.date}', '${b.id}')"
+          title="드래그하여 다른 날짜로 이동하거나 클릭하여 수정할 수 있습니다."
+          class="cursor-grab active:cursor-grabbing p-2.5 rounded-xl border text-xs sm:text-sm leading-snug transition shadow-2xs ${badgeStyle}">
           <div class="flex items-center justify-between gap-1 mb-1">
             <span class="inline-block px-2 py-0.5 rounded-md text-xs font-extrabold ${tagColor} shrink-0">${label}</span>
             <span class="text-xs font-extrabold opacity-90 shrink-0">${b.startTime}~${b.endTime}</span>
@@ -3071,6 +3180,58 @@
           <div class="text-xs font-medium opacity-85 truncate mt-0.5"><i class="fa-regular fa-comment-dots mr-1"></i>${escapeHtml(b.memo)}</div>
         </div>
       `;
+    }
+
+    // 차량 배차 일정 드래그 앤 드롭 핸들러
+    let draggedBookingId = null;
+
+    function handleBookingDragStart(e, bookingId) {
+      draggedBookingId = bookingId;
+      if (e.dataTransfer) {
+        e.dataTransfer.setData('text/plain', bookingId);
+        e.dataTransfer.effectAllowed = 'move';
+      }
+    }
+
+    function handleCellDragOver(e) {
+      e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
+      }
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleCellDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleBookingDrop(e, targetDateStr) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+
+      const bookingId = (e.dataTransfer && e.dataTransfer.getData('text/plain')) || draggedBookingId;
+      draggedBookingId = null;
+
+      if (!bookingId || !state.bookings || !state.bookings[bookingId]) return;
+      const booking = state.bookings[bookingId];
+
+      if (booking.date === targetDateStr) return;
+
+      // 이동할 날짜에 동시간대 동일 차량 중복 배차가 있는지 확인
+      const conflict = Object.values(state.bookings || {}).find(b => {
+        if (b.id === bookingId || b.date !== targetDateStr || b.vehicle !== booking.vehicle) return false;
+        return (booking.startTime < b.endTime && booking.endTime > b.startTime);
+      });
+
+      booking.date = targetDateStr;
+      saveToDataSource();
+
+      if (conflict) {
+        const conflictDriver = conflict.driver || conflict.member || '다른 팀원';
+        showCarToast(`[${targetDateStr}]로 이동되었습니다. (주의: ${conflictDriver}님의 동시간대 배차와 겹칩니다)`, 'warn');
+      } else {
+        showCarToast(`배차 일정이 [${targetDateStr}]로 이동되었습니다.`, 'success');
+      }
     }
 
     function changeMonth(delta) {
@@ -3449,6 +3610,7 @@
       addVehicle, removeVehicle,
       handleMemoInput,
       changeMonth, goToday, renderCalendar,
+      handleBookingDragStart, handleCellDragOver, handleCellDragLeave, handleBookingDrop,
       openBookingModal, closeBookingModal,
       syncCompanionList, updateCompanionCounter,
       updateDefaultTime, saveBooking,
