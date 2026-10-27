@@ -38,9 +38,10 @@
     .fc-event {
       cursor: pointer;
       border-radius: 4px;
-      padding: 1px 4px;
-      font-size: 0.8rem;
+      padding: 2px 5px;
+      font-size: 0.78rem;
       font-weight: 500;
+      line-height: 1.3;
     }
     .fc .fc-button-primary {
       background-color: #4f46e5 !important;
@@ -173,19 +174,22 @@
        [탭 1] 연가 및 근무 관리 섹션 (yeoncheon-leave 연결)
        ================================================================= -->
   <section id="section-leave" class="p-4 md:p-6 no-print">
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       <!-- 헤더 영역 -->
-      <div class="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2">
+      <div class="mb-6 flex flex-col lg:flex-row lg:justify-between lg:items-end gap-3">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-800">연천군정신건강복지센터 연가 관리</h1>
-          <p class="text-gray-500 mt-1 text-sm md:text-base">Since 1995 | 실시간 클라우드 동기화 됨 (yeoncheon-leave)</p>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-800">연천군정신건강복지센터 연가 및 대체휴무 관리</h1>
+          <p class="text-gray-500 mt-1 text-sm md:text-base">Since 1995 | 실시간 클라우드 동기화 됨 (점심시간 12:00~13:00 자동 미차감 지원)</p>
         </div>
-        <div class="flex flex-wrap gap-2 text-xs text-gray-600 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
-          <span class="font-semibold text-gray-700">구분 안내:</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>연가(차감)</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>공가(미차감)</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>대체휴무(미차감)</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>비공식 연가(미차감)</span>
+        <div class="flex flex-wrap gap-2 text-xs text-gray-600 bg-white px-3.5 py-2.5 rounded-xl border border-gray-200 shadow-xs">
+          <span class="font-bold text-gray-700">구분 안내:</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>연가(연가차감)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>대체휴무 발생(+적립)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>대체휴무 사용(-차감)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>공가</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-600 inline-block"></span>교육공가</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>검진공가</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>비공식 연가</span>
         </div>
       </div>
 
@@ -206,10 +210,10 @@
         <textarea id="leaveSharedMemo" class="w-full border border-gray-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-400 min-h-[80px] resize-y text-sm text-gray-700" placeholder="직원들과 공유할 연가 관련 메모나 공지사항을 입력하세요. 저장하면 다른 PC에서도 즉시 보입니다."></textarea>
       </div>
 
-      <!-- 메인 그리드: 신규 직원 등록 & 직원별 연가 현황 -->
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-        <!-- 직원 등록 폼 -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit lg:col-span-1">
+      <!-- 메인 그리드: 신규 직원 등록 & 직원별 연가/대체휴무 현황 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+        <!-- 직원 등록 폼 (3칸) -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit lg:col-span-3">
           <h2 class="text-xl font-bold mb-4 text-gray-700">신규 직원 등록</h2>
           <div class="space-y-4">
             <div>
@@ -232,11 +236,11 @@
           </div>
         </div>
 
-        <!-- 연가 현황 테이블 -->
-        <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <!-- 연가 현황 테이블 (9칸) -->
+        <div class="lg:col-span-9 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-            <h2 class="text-xl font-bold text-gray-700">직원별 연가 현황</h2>
-            <span class="text-xs text-gray-500">* 직원 이름 또는 하단 달력의 날짜를 클릭하면 연가/공가/대체휴무/비공식 연가를 등록할 수 있습니다.</span>
+            <h2 class="text-xl font-bold text-gray-700">직원별 연가 및 대체휴무 현황</h2>
+            <span class="text-xs text-gray-500">* 직원 이름을 클릭하면 상세 창이 열리며, 상단 <b>[대체휴무 누적 현황]</b> 박스를 누르면 대체휴무 적립을 별도로 기록할 수 있습니다.</span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
@@ -244,9 +248,10 @@
                 <tr class="bg-gray-50 border-b border-gray-200">
                   <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">이름</th>
                   <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">총 연가</th>
-                  <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">사용 연가 (차감)</th>
+                  <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">사용 연가(차감)</th>
                   <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">잔여 연가</th>
-                  <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">기타 (미차감 누적)</th>
+                  <th class="p-3 text-sm font-semibold text-teal-700 whitespace-nowrap bg-teal-50/40">대체휴무 (발생/사용/잔여)</th>
+                  <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">기타 (공가·교육·검진 등)</th>
                   <th class="p-3 text-sm font-semibold text-gray-600 text-center whitespace-nowrap">관리</th>
                 </tr>
               </thead>
@@ -263,21 +268,30 @@
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
           <div>
             <h2 class="text-xl font-bold text-gray-700">전체 연가 및 근무 일정표</h2>
-            <p class="text-xs text-indigo-600 font-medium mt-1">* 달력의 날짜 칸을 클릭(또는 드래그)하면 해당 날짜로 바로 연가/일정을 입력할 수 있습니다.</p>
+            <p class="text-xs text-indigo-600 font-medium mt-1">* 달력의 날짜 칸을 클릭(또는 드래그)하면 해당 날짜로 바로 연가/대체휴무/공가를 입력할 수 있습니다.</p>
           </div>
           <!-- 색상 범례 (Legend) -->
-          <div class="flex flex-wrap items-center gap-3 text-xs font-medium">
+          <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
             <span class="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-200">
               <span class="w-3 h-3 rounded-sm bg-[#4f46e5] inline-block"></span> 연가 (차감)
             </span>
-            <span class="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md border border-emerald-200">
-              <span class="w-3 h-3 rounded-sm bg-[#10b981] inline-block"></span> 공가 (미차감)
+            <span class="flex items-center gap-1.5 bg-teal-50 text-teal-800 px-2.5 py-1 rounded-md border border-teal-200">
+              <span class="w-3 h-3 rounded-sm bg-[#0d9488] inline-block"></span> 대체휴무 발생 (+적립)
             </span>
-            <span class="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md border border-amber-200">
-              <span class="w-3 h-3 rounded-sm bg-[#f59e0b] inline-block"></span> 대체휴무 (미차감)
+            <span class="flex items-center gap-1.5 bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md border border-amber-200">
+              <span class="w-3 h-3 rounded-sm bg-[#f59e0b] inline-block"></span> 대체휴무 사용 (-차감)
+            </span>
+            <span class="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md border border-emerald-200">
+              <span class="w-3 h-3 rounded-sm bg-[#10b981] inline-block"></span> 공가
+            </span>
+            <span class="flex items-center gap-1.5 bg-sky-50 text-sky-700 px-2.5 py-1 rounded-md border border-sky-200">
+              <span class="w-3 h-3 rounded-sm bg-[#0284c7] inline-block"></span> 교육공가
+            </span>
+            <span class="flex items-center gap-1.5 bg-rose-50 text-rose-700 px-2.5 py-1 rounded-md border border-rose-200">
+              <span class="w-3 h-3 rounded-sm bg-[#e11d48] inline-block"></span> 검진공가
             </span>
             <span class="flex items-center gap-1.5 bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md border border-purple-200">
-              <span class="w-3 h-3 rounded-sm bg-[#8b5cf6] inline-block"></span> 비공식 연가 (미차감)
+              <span class="w-3 h-3 rounded-sm bg-[#8b5cf6] inline-block"></span> 비공식 연가
             </span>
           </div>
         </div>
@@ -285,128 +299,383 @@
       </div>
     </div>
 
-    <!-- 개별 연가 사용 내역 모달창 -->
-    <div id="leaveModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] flex flex-col">
-        <div class="p-5 border-b flex justify-between items-center gap-3">
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-xl font-bold text-gray-800"><span id="modalEmpName"></span> 선생님 일정 및 연가 내역</h2>
-            </div>
-            <p class="text-xs text-gray-500 mt-0.5">공가, 대체휴무, 비공식 연가는 잔여 연가 시간에서 차감되지 않습니다.</p>
+    <!-- ===============================================================
+         개별 직원 상세 모달창 (휴가 사용 탭 / 대체휴무 적립 탭 분리)
+         =============================================================== -->
+    <div id="leaveModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-3 sm:p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+        <!-- 모달 헤더 -->
+        <div class="p-4 sm:p-5 border-b bg-slate-50/70 flex flex-wrap justify-between items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <h2 class="text-xl font-extrabold text-gray-800"><span id="modalEmpName"></span> 선생님 연가·대체휴무 관리</h2>
+            <!-- 대상 직원 빠른 변경 드롭다운 -->
+            <select id="modalEmpSelect" onchange="changeModalEmployee(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-bold text-indigo-700 outline-none focus:ring-2 focus:ring-indigo-400 bg-white cursor-pointer">
+              <!-- 직원 목록 동적 생성 -->
+            </select>
           </div>
           <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 cursor-pointer">&times;</button>
         </div>
 
-        <div class="p-5 overflow-y-auto flex-1">
-          <!-- 등록/수정 입력 폼 -->
-          <div class="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200">
-            <div class="flex justify-between items-center mb-3">
-              <h3 class="font-bold text-sm text-gray-700" id="formTitle">새 일정/연가 등록</h3>
-              <span id="deductNotice" class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">공식 연가 차감됨</span>
+        <div class="p-4 sm:p-5 overflow-y-auto flex-1 space-y-5">
+          <!-- 상단 요약 카드 2개 (클릭 시 해당 탭으로 전환) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <!-- 1. 공식 연가 현황 네모박스 -->
+            <div id="summaryCardLeave" onclick="switchModalSubTab('use')"
+              class="cursor-pointer rounded-xl p-4 border-2 transition-all flex justify-between items-center bg-indigo-50/80 border-indigo-500 shadow-xs hover:bg-indigo-100/70">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs sm:text-sm font-extrabold text-indigo-900">📅 공식 연가 및 휴가 사용</span>
+                  <span class="text-[11px] font-bold bg-indigo-600 text-white px-2 py-0.5 rounded-full">사용 입력</span>
+                </div>
+                <span id="modalLeaveSummarySub" class="text-xs text-gray-600 mt-1 block font-medium">총 15일 | 사용 0시간</span>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-indigo-700 font-bold block">잔여 연가</span>
+                <span id="modalLeaveRemain" class="text-xl font-extrabold text-indigo-900">15일</span>
+              </div>
             </div>
 
-            <div class="flex flex-col gap-4">
-              <!-- 대상 직원 선택 영역 -->
-              <div class="flex flex-col sm:flex-row sm:items-center gap-2 pb-3 border-b border-gray-200">
-                <label class="text-xs font-semibold text-gray-600 sm:w-24">대상 직원 선택</label>
-                <select id="modalEmpSelect" onchange="changeModalEmployee(this.value)" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm font-semibold text-gray-800 outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-                  <!-- 직원 목록 동적 생성 -->
-                </select>
+            <!-- 2. 대체휴무 누적 현황 네모박스 (클릭 시 대체휴무 발생/적립 탭으로 즉시 이동) -->
+            <div id="summaryCardComp" onclick="switchModalSubTab('accrue', true)"
+              class="cursor-pointer rounded-xl p-4 border-2 transition-all flex justify-between items-center bg-teal-50/70 border-teal-200 hover:border-teal-500 hover:bg-teal-100/60 group">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs sm:text-sm font-extrabold text-teal-900">➕ 대체휴무 누적 현황</span>
+                  <span class="text-[11px] font-extrabold bg-teal-600 text-white px-2 py-0.5 rounded-full group-hover:scale-105 transition">클릭하여 적립 입력·확인</span>
+                </div>
+                <span id="modalCompSummarySub" class="text-xs text-teal-800 mt-1 block font-semibold">총 발생 0시간 | 총 사용 0시간</span>
               </div>
-
-              <!-- 1열: 구분 선택 및 시작일 ~ 종료일 -->
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                <div class="sm:col-span-4">
-                  <label class="block text-xs font-semibold text-gray-600 mb-1">구분 (유형)</label>
-                  <select id="leaveType" onchange="updateDeductNotice()" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-                    <option value="연가">연가 (연가 차감)</option>
-                    <option value="공가">공가 (미차감)</option>
-                    <option value="대체휴무">대체휴무 (미차감)</option>
-                    <option value="비공식 연가">비공식 연가 (미차감)</option>
-                  </select>
-                </div>
-                <div class="sm:col-span-8 flex items-center gap-2">
-                  <div class="flex-1">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">시작일</label>
-                    <input type="date" id="startDate" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-                  </div>
-                  <span class="pt-5 text-gray-500 font-bold">~</span>
-                  <div class="flex-1">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">종료일</label>
-                    <input type="date" id="endDate" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-                  </div>
-                </div>
-              </div>
-
-              <!-- 2열: 시간 선택 영역 (일 / 시간 / 분) 및 버튼 -->
-              <div class="grid grid-cols-3 sm:grid-cols-5 gap-3 items-end">
-                <div class="col-span-1">
-                  <label class="block text-xs font-semibold text-gray-600 mb-1">일(Day)</label>
-                  <select id="useDays" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-                    <option value="0">0일</option>
-                    <option value="1">1일</option>
-                    <option value="2">2일</option>
-                    <option value="3">3일</option>
-                    <option value="4">4일</option>
-                    <option value="5">5일</option>
-                    <option value="6">6일</option>
-                    <option value="7">7일</option>
-                    <option value="8">8일</option>
-                    <option value="9">9일</option>
-                    <option value="10">10일</option>
-                    <option value="11">11일</option>
-                    <option value="12">12일</option>
-                    <option value="13">13일</option>
-                    <option value="14">14일</option>
-                    <option value="15">15일</option>
-                  </select>
-                </div>
-                <div class="col-span-1">
-                  <label class="block text-xs font-semibold text-gray-600 mb-1">시간(Hour)</label>
-                  <select id="useHours" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-                    <option value="0">0시간</option>
-                    <option value="1">1시간</option>
-                    <option value="2">2시간</option>
-                    <option value="3">3시간</option>
-                    <option value="4">4시간</option>
-                    <option value="5">5시간</option>
-                    <option value="6">6시간</option>
-                    <option value="7">7시간</option>
-                    <option value="8">8시간</option>
-                  </select>
-                </div>
-                <div class="col-span-1">
-                  <label class="block text-xs font-semibold text-gray-600 mb-1">분(Min)</label>
-                  <select id="useMins" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-                    <option value="0">00분</option>
-                    <option value="30">30분</option>
-                  </select>
-                </div>
-                <div class="col-span-3 sm:col-span-2 flex gap-2">
-                  <button onclick="saveLeaveRecord()" id="saveRecordBtn" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 text-sm transition cursor-pointer">등록</button>
-                  <button onclick="cancelEdit()" id="cancelEditBtn" class="hidden flex-1 bg-gray-500 text-white font-bold py-2 rounded-lg hover:bg-gray-600 text-sm transition cursor-pointer">취소</button>
-                </div>
+              <div class="text-right">
+                <span class="text-xs text-teal-700 font-bold block">잔여 대체휴무</span>
+                <span id="modalCompRemain" class="text-xl font-extrabold text-teal-900">0시간</span>
               </div>
             </div>
           </div>
 
-          <!-- 내역 리스트 -->
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr class="bg-gray-100 border-b border-gray-200">
-                  <th class="p-2.5 font-semibold text-gray-600 whitespace-nowrap">구분</th>
-                  <th class="p-2.5 font-semibold text-gray-600 whitespace-nowrap">사용 기간/날짜</th>
-                  <th class="p-2.5 font-semibold text-gray-600 whitespace-nowrap">시간 (차감 여부)</th>
-                  <th class="p-2.5 font-semibold text-gray-600 text-right whitespace-nowrap">관리</th>
-                </tr>
-              </thead>
-              <tbody id="recordTableBody">
-                <!-- 내역 렌더링 영역 -->
-              </tbody>
-            </table>
+          <!-- 모달 내부 탭 버튼 바 -->
+          <div class="flex border-b border-gray-200 gap-2">
+            <button type="button" id="subTabBtn-use" onclick="switchModalSubTab('use')"
+              class="px-4 py-2.5 text-sm font-extrabold border-b-2 border-indigo-600 text-indigo-700 bg-indigo-50/50 rounded-t-lg transition cursor-pointer flex items-center gap-1.5">
+              <i class="fa-regular fa-calendar-minus"></i> 휴가·공가·대체휴무 사용 기록
+            </button>
+            <button type="button" id="subTabBtn-accrue" onclick="switchModalSubTab('accrue')"
+              class="px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-teal-700 rounded-t-lg transition cursor-pointer flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-plus text-teal-600"></i> 대체휴무 발생(적립) 전용 관리
+              <span id="accrueCountBadge" class="text-xs bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full font-extrabold">0건</span>
+            </button>
           </div>
+
+          <!-- =========================================================
+               [모달 서브탭 1] 휴가·공가·대체휴무 사용 입력 및 내역
+               ========================================================= -->
+          <div id="modalSubTab-use" class="space-y-5">
+            <!-- 사용 등록/수정 폼 -->
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                <h3 class="font-bold text-sm text-gray-800" id="formTitle">새 휴가 / 공가 / 대체휴무 사용 등록</h3>
+                <span id="deductNotice" class="text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-700">공식 연가에서 차감됨</span>
+              </div>
+
+              <div class="flex flex-col gap-4">
+                <!-- 1열: 구분 선택 및 시작일 ~ 종료일 -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                  <div class="sm:col-span-4">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">사용 구분 (유형)</label>
+                    <select id="leaveType" onchange="updateDeductNotice()" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                      <option value="연가">연가 (공식 연가 차감)</option>
+                      <option value="대체휴무 사용">대체휴무 사용 (적립된 대체휴무 차감)</option>
+                      <option value="공가">공가 (연가 미차감)</option>
+                      <option value="교육공가">교육공가 (연가 미차감)</option>
+                      <option value="검진공가">검진공가 (연가 미차감)</option>
+                      <option value="비공식 연가">비공식 연가 (연가 미차감)</option>
+                    </select>
+                  </div>
+                  <div class="sm:col-span-8 flex items-center gap-2">
+                    <div class="flex-1">
+                      <label class="block text-xs font-semibold text-gray-600 mb-1">시작일</label>
+                      <input type="date" id="startDate" onchange="handleDateRangeChange()" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                    </div>
+                    <span class="pt-5 text-gray-500 font-bold">~</span>
+                    <div class="flex-1">
+                      <label class="block text-xs font-semibold text-gray-600 mb-1">종료일</label>
+                      <input type="date" id="endDate" onchange="handleDateRangeChange()" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2열: 사용 시간대 입력 및 점심시간(12:00~13:00) 자동 미차감 계산 -->
+                <div class="bg-white p-3.5 rounded-xl border border-indigo-100 space-y-3">
+                  <div class="flex flex-wrap justify-between items-center gap-2">
+                    <label class="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                      <i class="fa-regular fa-clock text-indigo-600"></i> 사용 시간대 입력 <span class="text-indigo-600 font-semibold">(점심시간 12:00~13:00 자동 미차감)</span>
+                    </label>
+                    <!-- 빠른 시간대 프리셋 버튼 -->
+                    <div class="flex flex-wrap gap-1.5">
+                      <button type="button" onclick="applyTimePreset('09:00', '18:00', true)" class="text-xs px-2.5 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold border border-indigo-200 transition cursor-pointer">
+                        전일 (09:00~18:00 · 8h)
+                      </button>
+                      <button type="button" onclick="applyTimePreset('09:00', '13:00', true)" class="text-xs px-2.5 py-1 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold border border-blue-200 transition cursor-pointer">
+                        오전반차 (09:00~13:00 · 4h)
+                      </button>
+                      <button type="button" onclick="applyTimePreset('14:00', '18:00', true)" class="text-xs px-2.5 py-1 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold border border-amber-200 transition cursor-pointer">
+                        오후반차 (14:00~18:00 · 4h)
+                      </button>
+                      <button type="button" onclick="applyTimePreset('10:00', '12:00', true)" class="text-xs px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold border border-emerald-200 transition cursor-pointer">
+                        2시간 (10:00~12:00)
+                      </button>
+                      <button type="button" onclick="applyTimePreset('', '', true)" class="text-xs px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold border border-gray-300 transition cursor-pointer">
+                        시간 미지정
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                    <div class="sm:col-span-6 flex items-center gap-2">
+                      <div class="flex-1">
+                        <label class="block text-[11px] font-medium text-gray-500 mb-1">시작 시간</label>
+                        <select id="leaveStartTime" onchange="calculateDurationFromTimeRange()" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                          <!-- JS 생성 -->
+                        </select>
+                      </div>
+                      <span class="pt-4 text-gray-400 font-bold">~</span>
+                      <div class="flex-1">
+                        <label class="block text-[11px] font-medium text-gray-500 mb-1">종료 시간</label>
+                        <select id="leaveEndTime" onchange="calculateDurationFromTimeRange()" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                          <!-- JS 생성 -->
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="sm:col-span-6 flex flex-col justify-center pt-1 sm:pt-3">
+                      <label class="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-bold text-gray-700">
+                        <input type="checkbox" id="excludeLunch" checked onchange="calculateDurationFromTimeRange()" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
+                        <span>점심시간(12:00~13:00) 연가 시간에서 자동 제외</span>
+                      </label>
+                      <p id="timeCalcPreview" class="text-xs text-indigo-600 font-semibold mt-1">
+                        * 시간대를 선택하면 점심시간(12:00~13:00)을 제외한 시간이 아래에 자동 계산됩니다.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3열: 사유 / 메모 입력 및 차감 시간 (일 / 시간 / 분) -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                  <div class="sm:col-span-5">
+                    <label for="leaveReason" class="block text-xs font-semibold text-gray-600 mb-1">사유 / 메모 (선택)</label>
+                    <input type="text" id="leaveReason" placeholder="예: 개인 용무, 병원 진료, 보수교육 등"
+                      class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                  </div>
+                  <div class="sm:col-span-7 grid grid-cols-3 sm:grid-cols-5 gap-2 items-end">
+                    <div class="col-span-1">
+                      <label class="block text-xs font-semibold text-gray-600 mb-1">일(Day)</label>
+                      <select id="useDays" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                        <option value="0">0일</option>
+                        <option value="1">1일</option>
+                        <option value="2">2일</option>
+                        <option value="3">3일</option>
+                        <option value="4">4일</option>
+                        <option value="5">5일</option>
+                        <option value="6">6일</option>
+                        <option value="7">7일</option>
+                        <option value="8">8일</option>
+                        <option value="9">9일</option>
+                        <option value="10">10일</option>
+                        <option value="11">11일</option>
+                        <option value="12">12일</option>
+                        <option value="13">13일</option>
+                        <option value="14">14일</option>
+                        <option value="15">15일</option>
+                      </select>
+                    </div>
+                    <div class="col-span-1">
+                      <label class="block text-xs font-semibold text-gray-600 mb-1">시간(Hour)</label>
+                      <select id="useHours" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                        <option value="0">0시간</option>
+                        <option value="1">1시간</option>
+                        <option value="2">2시간</option>
+                        <option value="3">3시간</option>
+                        <option value="4">4시간</option>
+                        <option value="5">5시간</option>
+                        <option value="6">6시간</option>
+                        <option value="7">7시간</option>
+                        <option value="8">8시간</option>
+                      </select>
+                    </div>
+                    <div class="col-span-1">
+                      <label class="block text-xs font-semibold text-gray-600 mb-1">분(Min)</label>
+                      <select id="useMins" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                        <option value="0">00분</option>
+                        <option value="30">30분</option>
+                      </select>
+                    </div>
+                    <div class="col-span-3 sm:col-span-2 flex gap-1.5">
+                      <button onclick="saveLeaveRecord()" id="saveRecordBtn" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 text-sm transition cursor-pointer shadow-xs">사용 등록</button>
+                      <button onclick="cancelEdit()" id="cancelEditBtn" class="hidden flex-1 bg-gray-500 text-white font-bold py-2 rounded-lg hover:bg-gray-600 text-sm transition cursor-pointer">취소</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 휴가/공가/대체휴무 사용 내역 테이블 -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <h4 class="text-sm font-bold text-gray-700">📋 휴가·공가·대체휴무 사용 내역</h4>
+                <span class="text-xs text-gray-500">* 대체휴무 적립 내역은 우측 <b>[대체휴무 발생(적립) 전용 관리]</b> 탭에서 확인하실 수 있습니다.</span>
+              </div>
+              <div class="overflow-x-auto border border-gray-200 rounded-xl">
+                <table class="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr class="bg-gray-100 border-b border-gray-200">
+                      <th class="p-2.5 font-semibold text-gray-600 whitespace-nowrap">구분</th>
+                      <th class="p-2.5 font-semibold text-gray-600 whitespace-nowrap">사용 일자</th>
+                      <th class="p-2.5 font-semibold text-indigo-700 whitespace-nowrap">사용 시간대</th>
+                      <th class="p-2.5 font-semibold text-gray-600 whitespace-nowrap">차감/사용 시간</th>
+                      <th class="p-2.5 font-semibold text-gray-600">사유 / 메모</th>
+                      <th class="p-2.5 font-semibold text-gray-600 text-right whitespace-nowrap">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recordTableBody">
+                    <!-- 사용 내역 렌더링 영역 -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- =========================================================
+               [모달 서브탭 2] 대체휴무 발생(적립) 전용 입력 칸 및 누적 확인 탭
+               ========================================================= -->
+          <div id="modalSubTab-accrue" class="hidden space-y-5">
+            <!-- 대체휴무 발생(적립) 전용 입력 폼 -->
+            <div class="bg-teal-50/70 p-4 sm:p-5 rounded-xl border-2 border-teal-300">
+              <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                <h3 class="font-extrabold text-sm sm:text-base text-teal-900 flex items-center gap-1.5" id="compFormTitle">
+                  <i class="fa-solid fa-file-circle-plus text-teal-600"></i> 발생한 대체휴무 적립 기록하기
+                </h3>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-teal-600 text-white">+ 대체휴무 누적 시간에 합산됨</span>
+              </div>
+
+              <div class="flex flex-col gap-4">
+                <!-- 1열: 발생 날짜 및 근무 시간대 (선택) -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                  <div class="sm:col-span-4">
+                    <label class="block text-xs font-bold text-teal-900 mb-1">발생 일자 (근무일)</label>
+                    <input type="date" id="compDate" class="w-full border border-teal-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                  </div>
+                  <div class="sm:col-span-8">
+                    <div class="flex flex-wrap justify-between items-center mb-1 gap-1">
+                      <label class="text-xs font-bold text-teal-900">근무 시간대 (선택 시 적립 시간 자동 계산)</label>
+                      <div class="flex flex-wrap gap-1">
+                        <button type="button" onclick="applyCompTimePreset('09:00', '18:00', true)" class="text-[11px] px-2 py-0.5 rounded bg-white hover:bg-teal-100 text-teal-800 font-bold border border-teal-300 cursor-pointer">
+                          휴일 전일(09~18시·8h)
+                        </button>
+                        <button type="button" onclick="applyCompTimePreset('09:00', '13:00', true)" class="text-[11px] px-2 py-0.5 rounded bg-white hover:bg-teal-100 text-teal-800 font-bold border border-teal-300 cursor-pointer">
+                          오전 4h(09~13시)
+                        </button>
+                        <button type="button" onclick="applyCompTimePreset('14:00', '18:00', true)" class="text-[11px] px-2 py-0.5 rounded bg-white hover:bg-teal-100 text-teal-800 font-bold border border-teal-300 cursor-pointer">
+                          오후 4h(14~18시)
+                        </button>
+                        <button type="button" onclick="applyCompTimePreset('', '', false)" class="text-[11px] px-2 py-0.5 rounded bg-white hover:bg-gray-100 text-gray-600 font-semibold border border-gray-300 cursor-pointer">
+                          직접선택
+                        </button>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <select id="compStartTime" onchange="calculateCompDuration()" class="flex-1 border border-teal-300 rounded-lg p-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                        <!-- JS 생성 -->
+                      </select>
+                      <span class="text-teal-700 font-bold">~</span>
+                      <select id="compEndTime" onchange="calculateCompDuration()" class="flex-1 border border-teal-300 rounded-lg p-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                        <!-- JS 생성 -->
+                      </select>
+                      <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-900 cursor-pointer shrink-0 ml-1">
+                        <input type="checkbox" id="compExcludeLunch" checked onchange="calculateCompDuration()" class="w-4 h-4 rounded text-teal-600">
+                        <span>점심(12~13시) 제외</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2열: 발생 사유 입력 (필수) 및 적립 시간 선택 -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                  <div class="sm:col-span-5">
+                    <label for="compReason" class="block text-xs font-extrabold text-teal-900 mb-1">
+                      발생 사유 입력 <span class="text-red-600">*</span>
+                    </label>
+                    <input type="text" id="compReason" placeholder="예: 정신건강의 날 주말 행사 지원, 야간 응급개입 출동 등"
+                      class="w-full border-2 border-teal-400 rounded-lg p-2 text-sm font-medium outline-none focus:ring-2 focus:ring-teal-600 bg-white">
+                  </div>
+
+                  <div class="sm:col-span-7 grid grid-cols-3 sm:grid-cols-5 gap-2 items-end">
+                    <div class="col-span-1">
+                      <label class="block text-xs font-bold text-teal-900 mb-1">적립 일(Day)</label>
+                      <select id="compDays" class="w-full border border-teal-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                        <option value="0">0일</option>
+                        <option value="1">1일</option>
+                        <option value="2">2일</option>
+                        <option value="3">3일</option>
+                        <option value="4">4일</option>
+                        <option value="5">5일</option>
+                      </select>
+                    </div>
+                    <div class="col-span-1">
+                      <label class="block text-xs font-bold text-teal-900 mb-1">적립 시간(Hour)</label>
+                      <select id="compHours" class="w-full border border-teal-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                        <option value="0">0시간</option>
+                        <option value="1">1시간</option>
+                        <option value="2">2시간</option>
+                        <option value="3">3시간</option>
+                        <option value="4">4시간</option>
+                        <option value="5">5시간</option>
+                        <option value="6">6시간</option>
+                        <option value="7">7시간</option>
+                        <option value="8">8시간</option>
+                      </select>
+                    </div>
+                    <div class="col-span-1">
+                      <label class="block text-xs font-bold text-teal-900 mb-1">적립 분(Min)</label>
+                      <select id="compMins" class="w-full border border-teal-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                        <option value="0">00분</option>
+                        <option value="30">30분</option>
+                      </select>
+                    </div>
+                    <div class="col-span-3 sm:col-span-2 flex gap-1.5">
+                      <button onclick="saveCompAccrueRecord()" id="saveCompBtn" class="flex-1 bg-teal-600 text-white font-extrabold py-2 rounded-lg hover:bg-teal-700 text-sm transition cursor-pointer shadow-xs">+ 적립 등록</button>
+                      <button onclick="cancelCompEdit()" id="cancelCompEditBtn" class="hidden flex-1 bg-gray-500 text-white font-bold py-2 rounded-lg hover:bg-gray-600 text-sm transition cursor-pointer">취소</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 대체휴무 발생(적립) 누적 내역 전용 테이블 -->
+            <div>
+              <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
+                <h4 class="text-sm font-extrabold text-teal-900">📌 대체휴무 발생(적립) 누적 기록 목록</h4>
+                <span id="compTableSummaryText" class="text-xs font-bold text-teal-800 bg-teal-50 px-3 py-1 rounded-lg border border-teal-200">
+                  총 발생 0시간 - 총 사용 0시간 = 잔여 0시간
+                </span>
+              </div>
+              <div class="overflow-x-auto border border-teal-200 rounded-xl">
+                <table class="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr class="bg-teal-50/80 border-b border-teal-200">
+                      <th class="p-2.5 font-bold text-teal-900 whitespace-nowrap">발생 일자</th>
+                      <th class="p-2.5 font-bold text-teal-900 whitespace-nowrap">근무 시간대</th>
+                      <th class="p-2.5 font-bold text-teal-900 whitespace-nowrap">발생(적립) 시간</th>
+                      <th class="p-2.5 font-bold text-teal-900">발생 사유</th>
+                      <th class="p-2.5 font-bold text-teal-900 text-right whitespace-nowrap">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody id="compAccrueTableBody">
+                    <!-- 대체휴무 발생 내역 렌더링 영역 -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -749,7 +1018,7 @@
         <div id="printArea" class="p-6 sm:p-8 overflow-y-auto flex-1 bg-white">
           <div class="text-center mb-6 border-b-2 border-slate-800 pb-4">
             <h1 id="printDocTitle" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">2026년 10월 차량 배차 및 운행 내역서</h1>
-            <p id="printDocSub" class="text-sm text-slate-600 mt-1.5 font-medium">출력일시: 2026-10-26 | 대상 차량: 전체 차량</p>
+            <p id="printDocSub" class="text-sm text-slate-600 mt-1.5 font-medium">출력일시: 2026-10-27 | 대상 차량: 전체 차량</p>
           </div>
 
           <div class="overflow-x-auto">
@@ -829,7 +1098,6 @@
         carSec.classList.add('hidden');
         btnLeave.className = "px-4 py-2 rounded-lg text-sm font-extrabold transition flex items-center gap-2 cursor-pointer bg-indigo-600 text-white shadow-xs";
         btnCar.className = "px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900";
-        // 탭 전환 시 FullCalendar 레이아웃 재계산
         if (window.leaveCalendarInstance) {
           setTimeout(() => window.leaveCalendarInstance.updateSize(), 50);
         }
@@ -862,51 +1130,247 @@
       appId: "1:450243392342:web:f862a3bbd07b825cea1cf7"
     };
 
-    // 앱 이름을 분리하여 차량 배차 Firebase와 충돌 방지
     const leaveApp = initializeApp(leaveFirebaseConfig, "yeoncheonLeaveApp");
     const db = getFirestore(leaveApp);
 
     let currentEmpId = null;
     let employeesData = [];
     let recordsData = [];
-    let editingRecordId = null;
+    let editingRecordId = null;       // 휴가/공가 사용 탭 수정 ID
+    let editingCompRecordId = null;   // 대체휴무 적립 탭 수정 ID
     let calendar;
     let pendingConfirmCallback = null;
 
+    // 기존 '초과근무' 또는 '대체휴무' 데이터를 '대체휴무 사용'으로 호환 매핑
     function normalizeLeaveType(type) {
       if (!type) return '연가';
-      if (type === '초과근무') return '대체휴무';
+      if (type === '초과근무' || type === '대체휴무') return '대체휴무 사용';
       return type;
     }
 
+    // 유형별 스타일 및 색상 정의
     const TYPE_CONFIG = {
       '연가': {
-        deduct: true,
+        mode: 'LEAVE_DEDUCT',
         badgeClass: 'bg-indigo-100 text-indigo-700 border-indigo-200',
         calBg: '#4f46e5',
         calBorder: '#4338ca'
       },
-      '공가': {
-        deduct: false,
-        badgeClass: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-        calBg: '#10b981',
-        calBorder: '#059669'
+      '대체휴무 발생': {
+        mode: 'COMP_ADD',
+        badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
+        calBg: '#0d9488',
+        calBorder: '#0f766e'
       },
-      '대체휴무': {
-        deduct: false,
+      '대체휴무 사용': {
+        mode: 'COMP_USE',
         badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
         calBg: '#f59e0b',
         calBorder: '#d97706'
       },
+      '공가': {
+        mode: 'OTHER',
+        badgeClass: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+        calBg: '#10b981',
+        calBorder: '#059669'
+      },
+      '교육공가': {
+        mode: 'OTHER',
+        badgeClass: 'bg-sky-100 text-sky-700 border-sky-200',
+        calBg: '#0284c7',
+        calBorder: '#0369a1'
+      },
+      '검진공가': {
+        mode: 'OTHER',
+        badgeClass: 'bg-rose-100 text-rose-700 border-rose-200',
+        calBg: '#e11d48',
+        calBorder: '#be123c'
+      },
       '비공식 연가': {
-        deduct: false,
+        mode: 'OTHER',
         badgeClass: 'bg-purple-100 text-purple-700 border-purple-200',
         calBg: '#8b5cf6',
         calBorder: '#7c3aed'
       }
     };
 
+    // 모달 내부 탭 전환 ('use': 휴가/대체휴무 사용 | 'accrue': 대체휴무 적립 전용)
+    window.switchModalSubTab = function(subTab, focusInput = false) {
+      const usePanel = document.getElementById('modalSubTab-use');
+      const accruePanel = document.getElementById('modalSubTab-accrue');
+      const btnUse = document.getElementById('subTabBtn-use');
+      const btnAccrue = document.getElementById('subTabBtn-accrue');
+      const cardLeave = document.getElementById('summaryCardLeave');
+      const cardComp = document.getElementById('summaryCardComp');
+
+      if (subTab === 'accrue') {
+        usePanel.classList.add('hidden');
+        accruePanel.classList.remove('hidden');
+
+        btnAccrue.className = "px-4 py-2.5 text-sm font-extrabold border-b-2 border-teal-600 text-teal-800 bg-teal-50/70 rounded-t-lg transition cursor-pointer flex items-center gap-1.5";
+        btnUse.className = "px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-indigo-700 rounded-t-lg transition cursor-pointer flex items-center gap-1.5";
+
+        cardComp.className = "cursor-pointer rounded-xl p-4 border-2 transition-all flex justify-between items-center bg-teal-50/90 border-teal-600 shadow-xs group";
+        cardLeave.className = "cursor-pointer rounded-xl p-4 border-2 transition-all flex justify-between items-center bg-indigo-50/50 border-indigo-200 hover:border-indigo-400";
+
+        if (focusInput) {
+          setTimeout(() => {
+            const reasonEl = document.getElementById('compReason');
+            if (reasonEl) reasonEl.focus();
+          }, 80);
+        }
+      } else {
+        accruePanel.classList.add('hidden');
+        usePanel.classList.remove('hidden');
+
+        btnUse.className = "px-4 py-2.5 text-sm font-extrabold border-b-2 border-indigo-600 text-indigo-700 bg-indigo-50/50 rounded-t-lg transition cursor-pointer flex items-center gap-1.5";
+        btnAccrue.className = "px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-teal-700 rounded-t-lg transition cursor-pointer flex items-center gap-1.5";
+
+        cardLeave.className = "cursor-pointer rounded-xl p-4 border-2 transition-all flex justify-between items-center bg-indigo-50/80 border-indigo-500 shadow-xs hover:bg-indigo-100/70";
+        cardComp.className = "cursor-pointer rounded-xl p-4 border-2 transition-all flex justify-between items-center bg-teal-50/70 border-teal-200 hover:border-teal-500 hover:bg-teal-100/60 group";
+      }
+    };
+
+    // 시간 드롭다운 옵션 초기화 (미지정 + 08:00 ~ 22:00, 30분 단위)
+    function initTimeSelectOptions() {
+      let optionsHtml = `<option value="">시간 미지정</option>`;
+      for (let h = 8; h <= 22; h++) {
+        const hh = String(h).padStart(2, '0');
+        optionsHtml += `<option value="${hh}:00">${hh}:00</option>`;
+        if (h < 22) {
+          optionsHtml += `<option value="${hh}:30">${hh}:30</option>`;
+        }
+      }
+      ['leaveStartTime', 'leaveEndTime', 'compStartTime', 'compEndTime'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = optionsHtml;
+      });
+    }
+
+    function timeStrToMins(tStr) {
+      if (!tStr || !tStr.includes(':')) return null;
+      const [h, m] = tStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    // [탭 1] 휴가 사용 시간대 프리셋
+    window.applyTimePreset = function(startT, endT, excludeLunchVal = true) {
+      document.getElementById('leaveStartTime').value = startT;
+      document.getElementById('leaveEndTime').value = endT;
+      document.getElementById('excludeLunch').checked = excludeLunchVal;
+      calculateDurationFromTimeRange();
+    };
+
+    // [탭 2] 대체휴무 적립 시간대 프리셋
+    window.applyCompTimePreset = function(startT, endT, excludeLunchVal = true) {
+      document.getElementById('compStartTime').value = startT;
+      document.getElementById('compEndTime').value = endT;
+      document.getElementById('compExcludeLunch').checked = excludeLunchVal;
+      calculateCompDuration();
+    };
+
+    // 시작일~종료일 변경 시 다일(2일 이상) 자동 반영
+    window.handleDateRangeChange = function() {
+      const sDate = document.getElementById('startDate').value;
+      const eDate = document.getElementById('endDate').value;
+      if (sDate && eDate && eDate > sDate) {
+        const sObj = new Date(sDate + 'T00:00:00');
+        const eObj = new Date(eDate + 'T00:00:00');
+        const diffDays = Math.round((eObj - sObj) / (1000 * 60 * 60 * 24)) + 1;
+        if (diffDays >= 2 && diffDays <= 15) {
+          document.getElementById('leaveStartTime').value = '';
+          document.getElementById('leaveEndTime').value = '';
+          document.getElementById('useDays').value = String(diffDays);
+          document.getElementById('useHours').value = '0';
+          document.getElementById('useMins').value = '0';
+          document.getElementById('timeCalcPreview').innerHTML =
+            `📅 다일 기간(${diffDays}일) 선택됨: <b>${diffDays}일</b>로 자동 설정되었습니다.`;
+          return;
+        }
+      }
+      calculateDurationFromTimeRange();
+    };
+
+    // [탭 1] 선택한 시작~종료 시간대에서 점심시간(12:00~13:00)을 자동 제외하여 일/시간/분 세팅
+    window.calculateDurationFromTimeRange = function() {
+      const startT = document.getElementById('leaveStartTime').value;
+      const endT = document.getElementById('leaveEndTime').value;
+      const excludeLunch = document.getElementById('excludeLunch').checked;
+      const previewEl = document.getElementById('timeCalcPreview');
+
+      if (!startT || !endT) {
+        previewEl.className = "text-xs text-gray-500 font-medium mt-1";
+        previewEl.innerText = "* 시간대 미지정 상태입니다. 아래 일/시간/분을 직접 선택해주세요.";
+        return;
+      }
+
+      const startM = timeStrToMins(startT);
+      const endM = timeStrToMins(endT);
+
+      if (endM <= startM) {
+        previewEl.className = "text-xs text-red-600 font-bold mt-1";
+        previewEl.innerText = "⚠️ 종료 시간은 시작 시간보다 늦어야 합니다.";
+        return;
+      }
+
+      const rawMins = endM - startM;
+      // 점심시간 12:00 (720분) ~ 13:00 (780분) 겹침 계산
+      let lunchOverlap = 0;
+      if (excludeLunch) {
+        lunchOverlap = Math.max(0, Math.min(endM, 780) - Math.max(startM, 720));
+      }
+
+      const netMins = Math.max(0, rawMins - lunchOverlap);
+
+      const days = Math.floor(netMins / 480);
+      const remainAfterDays = netMins % 480;
+      const hours = Math.floor(remainAfterDays / 60);
+      const mins = remainAfterDays % 60 >= 30 ? 30 : 0;
+
+      document.getElementById('useDays').value = String(Math.min(days, 15));
+      document.getElementById('useHours').value = String(Math.min(hours, 8));
+      document.getElementById('useMins').value = String(mins);
+
+      previewEl.className = "text-xs text-indigo-700 font-bold mt-1";
+      if (lunchOverlap > 0) {
+        previewEl.innerHTML = `⏱️ ${startT}~${endT} (총 ${formatTime(rawMins)} 중 점심시간 ${formatTime(lunchOverlap)} 미차감 ➔ <b>실제 차감: ${formatTime(netMins)}</b>)`;
+      } else {
+        previewEl.innerHTML = `⏱️ ${startT}~${endT} (점심시간 미포함 ➔ <b>실제 차감: ${formatTime(netMins)}</b>)`;
+      }
+    };
+
+    // [탭 2] 대체휴무 적립 시간대 자동 계산
+    window.calculateCompDuration = function() {
+      const startT = document.getElementById('compStartTime').value;
+      const endT = document.getElementById('compEndTime').value;
+      const excludeLunch = document.getElementById('compExcludeLunch').checked;
+
+      if (!startT || !endT) return;
+
+      const startM = timeStrToMins(startT);
+      const endM = timeStrToMins(endT);
+      if (endM <= startM) return;
+
+      const rawMins = endM - startM;
+      let lunchOverlap = 0;
+      if (excludeLunch) {
+        lunchOverlap = Math.max(0, Math.min(endM, 780) - Math.max(startM, 720));
+      }
+      const netMins = Math.max(0, rawMins - lunchOverlap);
+
+      const days = Math.floor(netMins / 480);
+      const remainAfterDays = netMins % 480;
+      const hours = Math.floor(remainAfterDays / 60);
+      const mins = remainAfterDays % 60 >= 30 ? 30 : 0;
+
+      document.getElementById('compDays').value = String(Math.min(days, 5));
+      document.getElementById('compHours').value = String(Math.min(hours, 8));
+      document.getElementById('compMins').value = String(mins);
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
+      initTimeSelectOptions();
+
       const calendarEl = document.getElementById('calendar');
       calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
@@ -943,8 +1407,14 @@
           if (record) {
             const emp = employeesData.find(e => e.id === record.empId);
             if (emp) {
-              openModal(emp.id, emp.name);
-              startEditRecord(record.id);
+              const normType = normalizeLeaveType(record.leaveType);
+              if (normType === '대체휴무 발생') {
+                openModal(emp.id, emp.name, null, null, 'accrue');
+                startEditCompRecord(record.id);
+              } else {
+                openModal(emp.id, emp.name, null, null, 'use');
+                startEditRecord(record.id);
+              }
               return;
             }
           }
@@ -987,8 +1457,11 @@
           startStr = rawDate.trim();
         }
 
-        const timeText = formatTime(record.usedMins);
-        const title = `[${type}] ${empName} (${timeText})`;
+        const signPrefix = config.mode === 'COMP_ADD' ? '+' : '';
+        const timeText = `${signPrefix}${formatTime(record.usedMins)}`;
+        const rangeText = record.timeRange ? ` [${record.timeRange}]` : '';
+        const reasonText = record.reason ? ` - ${record.reason}` : '';
+        const title = `[${type}] ${empName}${rangeText} (${timeText})${reasonText}`;
 
         calendar.addEvent({
           id: record.id,
@@ -1045,15 +1518,20 @@
       closeConfirmModal();
     });
 
+    // [탭 1] 구분(유형) 변경 시 안내 배지 업데이트
     window.updateDeductNotice = function() {
       const type = document.getElementById("leaveType").value;
       const noticeEl = document.getElementById("deductNotice");
+
       if (type === '연가') {
-        noticeEl.innerText = "공식 연가 차감됨";
-        noticeEl.className = "text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700";
+        noticeEl.innerText = "공식 연가에서 차감됨";
+        noticeEl.className = "text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-700";
+      } else if (type === '대체휴무 사용') {
+        noticeEl.innerText = "적립된 대체휴무에서 차감 (-사용 / 공식 연가 미차감)";
+        noticeEl.className = "text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-100 text-amber-800";
       } else {
-        noticeEl.innerText = `${type} (연가 미차감)`;
-        noticeEl.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700";
+        noticeEl.innerText = `${type} (공식 연가 미차감)`;
+        noticeEl.className = "text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-700";
       }
     };
 
@@ -1083,6 +1561,7 @@
       snapshot.forEach((docSnap) => employeesData.push({ id: docSnap.id, ...docSnap.data() }));
       renderEmployees();
       updateCalendar();
+      if (currentEmpId) updateModalEmployeeSummary();
     });
 
     // 연가 내역 실시간 수신
@@ -1091,8 +1570,52 @@
       snapshot.forEach((docSnap) => recordsData.push({ id: docSnap.id, ...docSnap.data() }));
       renderEmployees();
       updateCalendar();
-      if (currentEmpId) renderRecords();
+      if (currentEmpId) {
+        updateModalEmployeeSummary();
+        renderRecords();
+        renderCompAccrueRecords();
+      }
     });
+
+    // 특정 직원의 연가 및 대체휴무 통계 계산 함수
+    function calcEmployeeStats(emp) {
+      const empRecords = recordsData.filter(r => r.empId === emp.id);
+
+      // 1. 공식 연가 차감 합산
+      const deductedRecords = empRecords.filter(r => normalizeLeaveType(r.leaveType) === '연가');
+      const usedLeaveMins = deductedRecords.reduce((sum, r) => sum + (r.usedMins || 0), 0);
+      const totalLeaveMins = emp.totalMins || 0;
+      const remainLeaveMins = totalLeaveMins - usedLeaveMins;
+
+      // 2. 대체휴무 발생 / 사용 / 잔여 합산
+      const compAddRecords = empRecords.filter(r => normalizeLeaveType(r.leaveType) === '대체휴무 발생');
+      const compUseRecords = empRecords.filter(r => normalizeLeaveType(r.leaveType) === '대체휴무 사용');
+      const compEarnedMins = compAddRecords.reduce((sum, r) => sum + (r.usedMins || 0), 0);
+      const compUsedMins = compUseRecords.reduce((sum, r) => sum + (r.usedMins || 0), 0);
+      const compRemainMins = compEarnedMins - compUsedMins;
+
+      // 3. 기타 미차감 유형(공가, 교육공가, 검진공가, 비공식 연가) 합산
+      const otherRecords = empRecords.filter(r => {
+        const t = normalizeLeaveType(r.leaveType);
+        return t !== '연가' && t !== '대체휴무 발생' && t !== '대체휴무 사용';
+      });
+      const otherSummary = {};
+      otherRecords.forEach(r => {
+        const t = normalizeLeaveType(r.leaveType);
+        otherSummary[t] = (otherSummary[t] || 0) + (r.usedMins || 0);
+      });
+
+      return {
+        totalLeaveMins,
+        usedLeaveMins,
+        remainLeaveMins,
+        compEarnedMins,
+        compUsedMins,
+        compRemainMins,
+        compAddCount: compAddRecords.length,
+        otherSummary
+      };
+    }
 
     function renderEmployees() {
       const tbody = document.getElementById("employeeTableBody");
@@ -1110,34 +1633,38 @@
       });
 
       if (employeesData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-400 text-sm">등록된 직원이 없습니다. 좌측에서 직원을 등록해주세요.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400 text-sm">등록된 직원이 없습니다. 좌측에서 직원을 등록해주세요.</td></tr>`;
         return;
       }
 
       employeesData.forEach(emp => {
-        const empRecords = recordsData.filter(r => r.empId === emp.id);
+        const stats = calcEmployeeStats(emp);
 
-        const deductedRecords = empRecords.filter(r => normalizeLeaveType(r.leaveType) === '연가');
-        const usedTotalMins = deductedRecords.reduce((sum, r) => sum + (r.usedMins || 0), 0);
+        // 대체휴무 컬럼 HTML (클릭 시 바로 대체휴무 적립 탭으로 열림)
+        let compHtml = `<span class="text-teal-700 text-xs font-semibold underline decoration-dotted">+ 적립/내역</span>`;
+        if (stats.compEarnedMins > 0 || stats.compUsedMins > 0) {
+          const remainColor = stats.compRemainMins < 0 ? 'text-red-600 bg-red-50 border-red-200' : 'text-teal-800 bg-teal-50 border-teal-200';
+          compHtml = `
+            <div class="flex flex-col gap-0.5">
+              <span class="inline-block w-fit text-xs font-extrabold px-2 py-0.5 rounded border ${remainColor}">
+                잔여 ${formatTime(stats.compRemainMins)}
+              </span>
+              <span class="text-[11px] text-gray-500">
+                발생 ${formatTime(stats.compEarnedMins)} / 사용 ${formatTime(stats.compUsedMins)}
+              </span>
+            </div>
+          `;
+        }
 
-        const nonDeductedRecords = empRecords.filter(r => normalizeLeaveType(r.leaveType) !== '연가');
-        const nonDeductedSummary = {};
-        nonDeductedRecords.forEach(r => {
-          const t = normalizeLeaveType(r.leaveType);
-          nonDeductedSummary[t] = (nonDeductedSummary[t] || 0) + (r.usedMins || 0);
-        });
-
+        // 기타 미차감 컬럼 HTML
         let otherHtml = `<span class="text-gray-400 text-xs">-</span>`;
-        const otherKeys = Object.keys(nonDeductedSummary);
+        const otherKeys = Object.keys(stats.otherSummary);
         if (otherKeys.length > 0) {
           otherHtml = `<div class="flex flex-wrap gap-1">` + otherKeys.map(t => {
             const cfg = TYPE_CONFIG[t] || TYPE_CONFIG['공가'];
-            return `<span class="text-xs px-2 py-0.5 rounded border font-medium ${cfg.badgeClass}">${t} ${formatTime(nonDeductedSummary[t])}</span>`;
+            return `<span class="text-xs px-2 py-0.5 rounded border font-medium ${cfg.badgeClass}">${t} ${formatTime(stats.otherSummary[t])}</span>`;
           }).join("") + `</div>`;
         }
-
-        const totalMins = emp.totalMins || 0;
-        const remainMins = totalMins - usedTotalMins;
 
         const isLatest = (emp.id === latestEmpId && latestTime > 0);
         const badgeHtml = isLatest ? `<span class="bg-blue-100 text-blue-600 border border-blue-200 text-[10px] px-1.5 py-0.5 rounded-md font-bold ml-1.5 whitespace-nowrap align-middle">최근 변경</span>` : '';
@@ -1145,17 +1672,37 @@
         const tr = document.createElement("tr");
         tr.className = "border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer";
         tr.innerHTML = `
-          <td class="p-3 text-gray-800 font-medium whitespace-nowrap" onclick="openModal('${emp.id}', '${emp.name}')">${emp.name}${badgeHtml}</td>
-          <td class="p-3 text-blue-600 text-sm whitespace-nowrap" onclick="openModal('${emp.id}', '${emp.name}')">${formatTime(totalMins)}</td>
-          <td class="p-3 text-red-500 text-sm font-medium whitespace-nowrap" onclick="openModal('${emp.id}', '${emp.name}')">${formatTime(usedTotalMins)}</td>
-          <td class="p-3 font-bold text-gray-800 text-sm whitespace-nowrap" onclick="openModal('${emp.id}', '${emp.name}')">${formatTime(remainMins)}</td>
-          <td class="p-3" onclick="openModal('${emp.id}', '${emp.name}')">${otherHtml}</td>
+          <td class="p-3 text-gray-800 font-medium whitespace-nowrap" onclick="openModal('${emp.id}', '${emp.name}', null, null, 'use')">${emp.name}${badgeHtml}</td>
+          <td class="p-3 text-blue-600 text-sm whitespace-nowrap" onclick="openModal('${emp.id}', '${emp.name}', null, null, 'use')">${formatTime(stats.totalLeaveMins)}</td>
+          <td class="p-3 text-red-500 text-sm font-medium whitespace-nowrap" onclick="openModal('${emp.id}', '${emp.name}', null, null, 'use')">${formatTime(stats.usedLeaveMins)}</td>
+          <td class="p-3 font-bold text-gray-800 text-sm whitespace-nowrap" onclick="openModal('${emp.id}', '${emp.name}', null, null, 'use')">${formatTime(stats.remainLeaveMins)}</td>
+          <td class="p-3 bg-teal-50/20 hover:bg-teal-100/50 transition whitespace-nowrap" title="클릭하여 대체휴무 적립 및 내역 보기" onclick="openModal('${emp.id}', '${emp.name}', null, null, 'accrue')">${compHtml}</td>
+          <td class="p-3" onclick="openModal('${emp.id}', '${emp.name}', null, null, 'use')">${otherHtml}</td>
           <td class="p-3 text-center whitespace-nowrap">
             <button onclick="deleteEmployee('${emp.id}')" class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded hover:bg-red-200 font-medium transition cursor-pointer">삭제</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    // 모달 상단 직원 요약 카드 업데이트
+    function updateModalEmployeeSummary() {
+      const emp = employeesData.find(e => e.id === currentEmpId);
+      if (!emp) return;
+      const stats = calcEmployeeStats(emp);
+
+      document.getElementById("modalLeaveSummarySub").innerText =
+        `총 ${formatTime(stats.totalLeaveMins)} | 사용 ${formatTime(stats.usedLeaveMins)}`;
+      document.getElementById("modalLeaveRemain").innerText = formatTime(stats.remainLeaveMins);
+
+      document.getElementById("modalCompSummarySub").innerText =
+        `총 발생 ${formatTime(stats.compEarnedMins)} | 총 사용 ${formatTime(stats.compUsedMins)}`;
+      document.getElementById("modalCompRemain").innerText = formatTime(stats.compRemainMins);
+
+      document.getElementById("accrueCountBadge").innerText = `${stats.compAddCount}건`;
+      document.getElementById("compTableSummaryText").innerText =
+        `총 발생 ${formatTime(stats.compEarnedMins)} - 총 사용 ${formatTime(stats.compUsedMins)} = 잔여 ${formatTime(stats.compRemainMins)}`;
     }
 
     // 신규 직원 등록
@@ -1187,7 +1734,7 @@
 
     // 직원 삭제
     window.deleteEmployee = function(id) {
-      openConfirmModal("해당 직원과 모든 연가/근무 내역이 삭제됩니다. 계속하시겠습니까?", async () => {
+      openConfirmModal("해당 직원과 모든 연가/대체휴무/근무 내역이 삭제됩니다. 계속하시겠습니까?", async () => {
         try {
           await deleteDoc(doc(db, "employees", id));
           const batch = writeBatch(db);
@@ -1224,16 +1771,23 @@
       const currentStart = document.getElementById("startDate").value;
       const currentEnd = document.getElementById("endDate").value;
       cancelEdit(currentStart, currentEnd);
+      cancelCompEdit(currentStart);
+      updateModalEmployeeSummary();
       renderRecords();
+      renderCompAccrueRecords();
     };
 
-    window.openModal = function(id, name, presetStartDate = null, presetEndDate = null) {
+    window.openModal = function(id, name, presetStartDate = null, presetEndDate = null, initialSubTab = 'use') {
       currentEmpId = id;
       document.getElementById("modalEmpName").innerText = name;
       populateModalEmpSelect(id);
       cancelEdit(presetStartDate, presetEndDate);
+      cancelCompEdit(presetStartDate);
+      updateModalEmployeeSummary();
+      switchModalSubTab(initialSubTab, initialSubTab === 'accrue');
       document.getElementById("leaveModal").classList.remove("hidden");
       renderRecords();
+      renderCompAccrueRecords();
     };
 
     window.openModalByDate = function(startStr, endStr) {
@@ -1242,33 +1796,50 @@
         return;
       }
       const defaultEmp = employeesData[0];
-      openModal(defaultEmp.id, defaultEmp.name, startStr, endStr || startStr);
+      openModal(defaultEmp.id, defaultEmp.name, startStr, endStr || startStr, 'use');
     };
 
     window.closeModal = function() {
       document.getElementById("leaveModal").classList.add("hidden");
       currentEmpId = null;
       editingRecordId = null;
+      editingCompRecordId = null;
     };
 
+    // [탭 1] 휴가·공가·대체휴무 사용 내역 렌더링 (대체휴무 발생은 제외하고 탭 2에 별도 표시)
     function renderRecords() {
       const tbody = document.getElementById("recordTableBody");
       tbody.innerHTML = "";
-      const empRecords = recordsData.filter(r => r.empId === currentEmpId).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const empUseRecords = recordsData
+        .filter(r => r.empId === currentEmpId && normalizeLeaveType(r.leaveType) !== '대체휴무 발생')
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-      if (empRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500">등록된 일정/연가 내역이 없습니다.</td></tr>`;
+      if (empUseRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-400">등록된 휴가·공가·대체휴무 사용 내역이 없습니다.</td></tr>`;
         return;
       }
 
-      empRecords.forEach(record => {
+      empUseRecords.forEach(record => {
         const displayDate = record.dateStr || record.date || "날짜 미상";
         const type = normalizeLeaveType(record.leaveType);
         const config = TYPE_CONFIG[type] || TYPE_CONFIG['연가'];
 
-        const timeHtml = config.deduct
-          ? `<span class="text-red-500 font-semibold">-${formatTime(record.usedMins)}</span>`
-          : `<span class="text-gray-700 font-medium">${formatTime(record.usedMins)}</span> <span class="text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded ml-1">미차감</span>`;
+        const timeRangeCell = record.timeRange
+          ? `<span class="inline-flex items-center text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-200"><i class="fa-regular fa-clock mr-1"></i>${record.timeRange}</span>`
+          : `<span class="text-gray-400 text-xs">전일/미지정</span>`;
+
+        let timeHtml = '';
+        if (config.mode === 'LEAVE_DEDUCT') {
+          timeHtml = `<span class="text-red-500 font-bold">-${formatTime(record.usedMins)}</span> <span class="text-[11px] text-red-600 bg-red-50 px-1.5 py-0.5 rounded ml-1">연가차감</span>`;
+        } else if (config.mode === 'COMP_USE') {
+          timeHtml = `<span class="text-amber-700 font-bold">-${formatTime(record.usedMins)}</span> <span class="text-[11px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded ml-1">대체차감</span>`;
+        } else {
+          timeHtml = `<span class="text-gray-700 font-medium">${formatTime(record.usedMins)}</span> <span class="text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded ml-1">미차감</span>`;
+        }
+
+        const reasonHtml = record.reason
+          ? `<span class="text-gray-800 font-medium">${record.reason}</span>`
+          : `<span class="text-gray-400 text-xs">-</span>`;
 
         const tr = document.createElement("tr");
         tr.className = "border-b border-gray-100 hover:bg-gray-50";
@@ -1276,8 +1847,10 @@
           <td class="p-2.5 whitespace-nowrap">
             <span class="text-xs px-2 py-0.5 rounded border font-bold ${config.badgeClass}">${type}</span>
           </td>
-          <td class="p-2.5 text-gray-700 font-medium whitespace-nowrap">${displayDate}</td>
+          <td class="p-2.5 text-gray-700 font-semibold whitespace-nowrap">${displayDate}</td>
+          <td class="p-2.5 whitespace-nowrap">${timeRangeCell}</td>
           <td class="p-2.5 whitespace-nowrap">${timeHtml}</td>
+          <td class="p-2.5 text-sm">${reasonHtml}</td>
           <td class="p-2.5 text-right whitespace-nowrap">
             <button onclick="startEditRecord('${record.id}')" class="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded hover:bg-green-200 font-medium mr-1 transition cursor-pointer">수정</button>
             <button onclick="deleteRecord('${record.id}')" class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded hover:bg-red-200 font-medium transition cursor-pointer">삭제</button>
@@ -1287,10 +1860,56 @@
       });
     }
 
+    // [탭 2] 대체휴무 발생(적립) 전용 테이블 렌더링
+    function renderCompAccrueRecords() {
+      const tbody = document.getElementById("compAccrueTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const empCompRecords = recordsData
+        .filter(r => r.empId === currentEmpId && normalizeLeaveType(r.leaveType) === '대체휴무 발생')
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      if (empCompRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">등록된 대체휴무 발생(적립) 내역이 없습니다. 위 입력 칸에서 발생 일자와 사유를 입력해 적립해주세요.</td></tr>`;
+        return;
+      }
+
+      empCompRecords.forEach(record => {
+        const displayDate = record.dateStr || record.date || "날짜 미상";
+        const timeRangeCell = record.timeRange
+          ? `<span class="inline-flex items-center text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-md border border-teal-200"><i class="fa-regular fa-clock mr-1"></i>${record.timeRange}</span>`
+          : `<span class="text-gray-400 text-xs">미지정</span>`;
+
+        const reasonHtml = record.reason
+          ? `<span class="text-gray-900 font-bold">${record.reason}</span>`
+          : `<span class="text-gray-400 text-xs">사유 미입력</span>`;
+
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-teal-100 hover:bg-teal-50/40";
+        tr.innerHTML = `
+          <td class="p-2.5 text-gray-800 font-bold whitespace-nowrap">${displayDate}</td>
+          <td class="p-2.5 whitespace-nowrap">${timeRangeCell}</td>
+          <td class="p-2.5 whitespace-nowrap">
+            <span class="text-teal-700 font-extrabold">+${formatTime(record.usedMins)}</span>
+            <span class="text-[11px] text-teal-800 bg-teal-100 px-1.5 py-0.5 rounded ml-1 font-bold">적립</span>
+          </td>
+          <td class="p-2.5 text-sm">${reasonHtml}</td>
+          <td class="p-2.5 text-right whitespace-nowrap">
+            <button onclick="startEditCompRecord('${record.id}')" class="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded hover:bg-green-200 font-medium mr-1 transition cursor-pointer">수정</button>
+            <button onclick="deleteRecord('${record.id}')" class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded hover:bg-red-200 font-medium transition cursor-pointer">삭제</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // [탭 1] 사용 내역 수정 모드 진입
     window.startEditRecord = function(id) {
       const record = recordsData.find(r => r.id === id);
       if (!record) return;
 
+      switchModalSubTab('use');
       editingRecordId = id;
 
       document.getElementById("leaveType").value = normalizeLeaveType(record.leaveType);
@@ -1306,6 +1925,17 @@
         document.getElementById("endDate").value = rawDate.trim();
       }
 
+      if (record.timeRange && record.timeRange.includes("~")) {
+        const [st, et] = record.timeRange.split("~").map(s => s.trim());
+        document.getElementById("leaveStartTime").value = st || "";
+        document.getElementById("leaveEndTime").value = et || "";
+      } else {
+        document.getElementById("leaveStartTime").value = "";
+        document.getElementById("leaveEndTime").value = "";
+      }
+      document.getElementById("excludeLunch").checked = record.excludeLunch !== false;
+      document.getElementById("leaveReason").value = record.reason || "";
+
       const days = Math.floor(record.usedMins / (8 * 60));
       const remain = record.usedMins % (8 * 60);
       const hours = Math.floor(remain / 60);
@@ -1315,7 +1945,7 @@
       document.getElementById("useHours").value = hours;
       document.getElementById("useMins").value = mins;
 
-      document.getElementById("formTitle").innerText = "일정/연가 내역 수정";
+      document.getElementById("formTitle").innerText = "휴가 / 공가 / 대체휴무 사용 내역 수정";
       document.getElementById("saveRecordBtn").innerText = "수정 완료";
       document.getElementById("saveRecordBtn").classList.replace("bg-indigo-600", "bg-green-600");
       document.getElementById("saveRecordBtn").classList.replace("hover:bg-indigo-700", "hover:bg-green-700");
@@ -1335,21 +1965,91 @@
       document.getElementById("startDate").value = startVal;
       document.getElementById("endDate").value = endVal;
 
+      document.getElementById("leaveStartTime").value = "";
+      document.getElementById("leaveEndTime").value = "";
+      document.getElementById("excludeLunch").checked = true;
+      document.getElementById("leaveReason").value = "";
+
       document.getElementById("useDays").value = "0";
       document.getElementById("useHours").value = "0";
       document.getElementById("useMins").value = "0";
 
-      document.getElementById("formTitle").innerText = "새 일정/연가 등록";
-      document.getElementById("saveRecordBtn").innerText = "등록";
+      const previewEl = document.getElementById('timeCalcPreview');
+      if (previewEl) {
+        previewEl.className = "text-xs text-indigo-600 font-semibold mt-1";
+        previewEl.innerText = "* 시간대를 선택하면 점심시간(12:00~13:00)을 제외한 시간이 아래에 자동 계산됩니다.";
+      }
+
+      document.getElementById("formTitle").innerText = "새 휴가 / 공가 / 대체휴무 사용 등록";
+      document.getElementById("saveRecordBtn").innerText = "사용 등록";
       document.getElementById("saveRecordBtn").classList.replace("bg-green-600", "bg-indigo-600");
       document.getElementById("saveRecordBtn").classList.replace("hover:bg-green-700", "hover:bg-indigo-700");
       document.getElementById("cancelEditBtn").classList.add("hidden");
     };
 
+    // [탭 2] 대체휴무 적립 내역 수정 모드 진입
+    window.startEditCompRecord = function(id) {
+      const record = recordsData.find(r => r.id === id);
+      if (!record) return;
+
+      switchModalSubTab('accrue');
+      editingCompRecordId = id;
+
+      const rawDate = record.dateStr || record.date || "";
+      document.getElementById("compDate").value = rawDate.split("~")[0].trim();
+
+      if (record.timeRange && record.timeRange.includes("~")) {
+        const [st, et] = record.timeRange.split("~").map(s => s.trim());
+        document.getElementById("compStartTime").value = st || "";
+        document.getElementById("compEndTime").value = et || "";
+      } else {
+        document.getElementById("compStartTime").value = "";
+        document.getElementById("compEndTime").value = "";
+      }
+      document.getElementById("compExcludeLunch").checked = record.excludeLunch !== false;
+      document.getElementById("compReason").value = record.reason || "";
+
+      const days = Math.floor(record.usedMins / (8 * 60));
+      const remain = record.usedMins % (8 * 60);
+      const hours = Math.floor(remain / 60);
+      const mins = remain % 60;
+
+      document.getElementById("compDays").value = days;
+      document.getElementById("compHours").value = hours;
+      document.getElementById("compMins").value = mins;
+
+      document.getElementById("compFormTitle").innerHTML = `<i class="fa-solid fa-pen-to-square text-teal-600"></i> 대체휴무 발생(적립) 내역 수정`;
+      document.getElementById("saveCompBtn").innerText = "적립 수정완료";
+      document.getElementById("cancelCompEditBtn").classList.remove("hidden");
+    };
+
+    window.cancelCompEdit = function(presetDate = null) {
+      editingCompRecordId = null;
+      const today = new Date().toISOString().substring(0, 10);
+      document.getElementById("compDate").value = (typeof presetDate === 'string' && presetDate) ? presetDate : today;
+      document.getElementById("compStartTime").value = "";
+      document.getElementById("compEndTime").value = "";
+      document.getElementById("compExcludeLunch").checked = true;
+      document.getElementById("compReason").value = "";
+      document.getElementById("compDays").value = "0";
+      document.getElementById("compHours").value = "0";
+      document.getElementById("compMins").value = "0";
+
+      document.getElementById("compFormTitle").innerHTML = `<i class="fa-solid fa-file-circle-plus text-teal-600"></i> 발생한 대체휴무 적립 기록하기`;
+      document.getElementById("saveCompBtn").innerText = "+ 적립 등록";
+      document.getElementById("cancelCompEditBtn").classList.add("hidden");
+    };
+
+    // [탭 1] 휴가·공가·대체휴무 사용 저장
     window.saveLeaveRecord = async function() {
       const leaveType = document.getElementById("leaveType").value;
       const startDate = document.getElementById("startDate").value;
       const endDate = document.getElementById("endDate").value;
+
+      const startT = document.getElementById("leaveStartTime").value;
+      const endT = document.getElementById("leaveEndTime").value;
+      const excludeLunch = document.getElementById("excludeLunch").checked;
+      const reason = document.getElementById("leaveReason").value.trim();
 
       const days = parseInt(document.getElementById("useDays").value) || 0;
       const hours = parseInt(document.getElementById("useHours").value) || 0;
@@ -1359,13 +2059,20 @@
 
       if (!startDate) return showLeaveToast("시작일을 지정해주세요.");
       if (endDate && endDate < startDate) return showLeaveToast("종료일은 시작일보다 빠를 수 없습니다.");
-      if (usedMins === 0) return showLeaveToast("사용할 시간(일/시간/분)을 선택해주세요.");
+      if ((startT && !endT) || (!startT && endT)) {
+        return showLeaveToast("시작 시간과 종료 시간을 모두 선택하거나 모두 '시간 미지정'으로 두세요.");
+      }
+      if (startT && endT && timeStrToMins(endT) <= timeStrToMins(startT)) {
+        return showLeaveToast("종료 시간은 시작 시간보다 늦어야 합니다.");
+      }
+      if (usedMins === 0) return showLeaveToast("차감/사용할 시간(일/시간/분)을 선택해주세요.");
 
       let dateStr = startDate;
       if (endDate && startDate !== endDate) {
         dateStr = `${startDate} ~ ${endDate}`;
       }
 
+      const timeRange = (startT && endT) ? `${startT}~${endT}` : "";
       const now = new Date().getTime();
 
       try {
@@ -1373,22 +2080,97 @@
           await updateDoc(doc(db, "leave_records", editingRecordId), {
             leaveType: leaveType,
             dateStr: dateStr,
+            timeRange: timeRange,
+            excludeLunch: excludeLunch,
+            reason: reason,
             usedMins: usedMins
           });
           await updateDoc(doc(db, "employees", currentEmpId), { updatedAt: now });
-          showLeaveToast("내역이 수정되었습니다.");
+          showLeaveToast("사용 내역이 수정되었습니다.");
           cancelEdit();
         } else {
           await addDoc(collection(db, "leave_records"), {
             empId: currentEmpId,
             leaveType: leaveType,
             dateStr: dateStr,
+            timeRange: timeRange,
+            excludeLunch: excludeLunch,
+            reason: reason,
             usedMins: usedMins,
             createdAt: now
           });
           await updateDoc(doc(db, "employees", currentEmpId), { updatedAt: now });
           cancelEdit();
-          showLeaveToast(leaveType === '연가' ? "연가가 등록 및 차감되었습니다." : `${leaveType} 일정이 등록되었습니다. (연가 미차감)`);
+          if (leaveType === '연가') {
+            showLeaveToast("연가가 등록 및 차감되었습니다.");
+          } else if (leaveType === '대체휴무 사용') {
+            showLeaveToast("대체휴무 사용 시간이 차감되었습니다.");
+          } else {
+            showLeaveToast(`${leaveType} 일정이 등록되었습니다.`);
+          }
+        }
+      } catch (e) {
+        showLeaveToast("오류 발생: " + e.message);
+      }
+    };
+
+    // [탭 2] 대체휴무 발생(적립) 전용 저장
+    window.saveCompAccrueRecord = async function() {
+      const compDate = document.getElementById("compDate").value;
+      const startT = document.getElementById("compStartTime").value;
+      const endT = document.getElementById("compEndTime").value;
+      const excludeLunch = document.getElementById("compExcludeLunch").checked;
+      const reason = document.getElementById("compReason").value.trim();
+
+      const days = parseInt(document.getElementById("compDays").value) || 0;
+      const hours = parseInt(document.getElementById("compHours").value) || 0;
+      const mins = parseInt(document.getElementById("compMins").value) || 0;
+
+      const usedMins = (days * 8 * 60) + (hours * 60) + mins;
+
+      if (!compDate) return showLeaveToast("대체휴무 발생 일자를 선택해주세요.");
+      if ((startT && !endT) || (!startT && endT)) {
+        return showLeaveToast("근무 시작 시간과 종료 시간을 모두 선택하거나 모두 비워두세요.");
+      }
+      if (startT && endT && timeStrToMins(endT) <= timeStrToMins(startT)) {
+        return showLeaveToast("종료 시간은 시작 시간보다 늦어야 합니다.");
+      }
+      if (!reason) {
+        document.getElementById("compReason").focus();
+        return showLeaveToast("대체휴무 발생 사유를 입력해주세요.");
+      }
+      if (usedMins === 0) return showLeaveToast("적립할 시간(일/시간/분)을 선택해주세요.");
+
+      const timeRange = (startT && endT) ? `${startT}~${endT}` : "";
+      const now = new Date().getTime();
+
+      try {
+        if (editingCompRecordId) {
+          await updateDoc(doc(db, "leave_records", editingCompRecordId), {
+            leaveType: "대체휴무 발생",
+            dateStr: compDate,
+            timeRange: timeRange,
+            excludeLunch: excludeLunch,
+            reason: reason,
+            usedMins: usedMins
+          });
+          await updateDoc(doc(db, "employees", currentEmpId), { updatedAt: now });
+          showLeaveToast("대체휴무 적립 내역이 수정되었습니다.");
+          cancelCompEdit();
+        } else {
+          await addDoc(collection(db, "leave_records"), {
+            empId: currentEmpId,
+            leaveType: "대체휴무 발생",
+            dateStr: compDate,
+            timeRange: timeRange,
+            excludeLunch: excludeLunch,
+            reason: reason,
+            usedMins: usedMins,
+            createdAt: now
+          });
+          await updateDoc(doc(db, "employees", currentEmpId), { updatedAt: now });
+          cancelCompEdit();
+          showLeaveToast("대체휴무 발생 시간이 누적 적립되었습니다.");
         }
       } catch (e) {
         showLeaveToast("오류 발생: " + e.message);
@@ -1400,7 +2182,7 @@
       const type = record ? normalizeLeaveType(record.leaveType) : '연가';
       const msg = type === '연가'
         ? "이 연가 차감 내역을 삭제하시겠습니까? (연가 시간이 다시 복구됩니다)"
-        : `이 ${type} 내역을 삭제하시겠습니까?`;
+        : `이 [${type}] 내역을 삭제하시겠습니까?`;
 
       openConfirmModal(msg, async () => {
         try {
