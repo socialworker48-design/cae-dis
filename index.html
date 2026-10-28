@@ -4009,8 +4009,8 @@
     }, 25000);
   </script>
 <!-- =================================================================
-       [통합 보안(잠금)·휴지통(복구)·텔레그램 알림 플러그인 블록]
-       기존 코드 수정 없이 </body> 바로 위에 붙여넣기만 하면 작동합니다.
+       [보안 잠금(5493) · 휴지통 복구함 · 텔레그램 서버 영구 저장 통합 블록]
+       중간 코드 수정 없이 맨 아래(</body> 바로 위)에 이 블록 하나만 두시면 됩니다.
        ================================================================= -->
 
   <!-- 1. 접속 비밀번호 잠금 화면 (초기 암호: 5493) -->
@@ -4050,7 +4050,6 @@
       </div>
 
       <div class="p-5 overflow-y-auto space-y-5 text-sm flex-1">
-        <!-- 전체 데이터 백업 & 비밀번호 변경 바 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 flex flex-col justify-between gap-2">
             <div>
@@ -4064,7 +4063,7 @@
 
           <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between gap-2">
             <div>
-              <h4 class="font-extrabold text-slate-800 text-xs sm:text-sm"><i class="fa-solid fa-key mr-1 text-amber-500"></i>접속 비밀번호 변경</h4>
+              <h4 class="font-extrabold text-slate-800 text-xs sm:text-sm"><i class="fa-solid fa-key mr-1 text-amber-500"></i>접속 비밀번호 변경 (서버 동기화)</h4>
               <p class="text-xs text-slate-500 mt-0.5">초기 비밀번호(5493)를 새 번호로 변경합니다.</p>
             </div>
             <div class="flex gap-1.5">
@@ -4076,7 +4075,6 @@
           </div>
         </div>
 
-        <!-- 삭제된 데이터 휴지통 목록 -->
         <div>
           <div class="flex justify-between items-center mb-2">
             <h4 class="font-extrabold text-slate-800"><i class="fa-regular fa-trash-can mr-1 text-rose-500"></i>최근 삭제된 항목 (휴지통)</h4>
@@ -4100,83 +4098,166 @@
     </div>
   </div>
 
-  <!-- 3. 텔레그램 일일 일정 알림 모달 -->
-  <div id="telegramModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-3 sm:p-4 no-print">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-      <div class="px-6 py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-white flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <i class="fa-brands fa-telegram text-2xl"></i>
-          <h3 class="font-extrabold text-base sm:text-lg">텔레그램 일일 일정 즉시 브리핑</h3>
-        </div>
-        <button onclick="closeTelegramModal()" class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center cursor-pointer">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <div class="p-5 overflow-y-auto space-y-4 text-sm">
-        <div class="flex flex-wrap justify-between items-center gap-2">
-          <span class="text-xs font-bold text-slate-600">조회 및 발송 대상 일자:</span>
-          <div class="flex items-center gap-1.5">
-            <input type="date" id="tgTargetDate" onchange="updateTelegramPreview()" class="border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold bg-white">
-            <button type="button" onclick="setTgTargetOffset(0)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">오늘</button>
-            <button type="button" onclick="setTgTargetOffset(1)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">내일</button>
-          </div>
-        </div>
-        <textarea id="tgPreviewBox" rows="10" class="w-full border border-slate-300 rounded-xl p-3 text-xs sm:text-sm font-mono bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 leading-relaxed"></textarea>
-        <div class="flex justify-end gap-2">
-          <button type="button" onclick="updateTelegramPreview()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer">새로고침</button>
-          <button type="button" onclick="sendTelegramBriefingNow()" class="px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs sm:text-sm shadow-sm cursor-pointer">
-            <i class="fa-brands fa-telegram mr-1"></i>단체방으로 즉시 발송
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
     (function() {
-      // 기본 설정값 (초기 비밀번호: 5493 / 텔레그램 토큰 및 단체방 ID 내장)
       const DEFAULT_PIN = "5493";
-      const TG_BOT_TOKEN = "9212624358:AAH8ouMObkIXK59NOsICoSqVwAY_nPo9VQk";
-      const TG_CHAT_ID = "-1004334674704";
+      const DEFAULT_TG = {
+        botToken: "9212624358:AAH8ouMObkIXK59NOsICoSqVwAY_nPo9VQk",
+        chatId: "-1004334674704",
+        autoTime: "08:45"
+      };
       const LEAVE_FIRESTORE_URL = "https://firestore.googleapis.com/v1/projects/yeoncheon-leave/databases/(default)/documents";
 
       let currentPin = localStorage.getItem("yc_system_pin") || DEFAULT_PIN;
       let trashBin = JSON.parse(localStorage.getItem("yc_trash_bin") || "[]");
+      let tgConfig = Object.assign({}, DEFAULT_TG, JSON.parse(localStorage.getItem("yc_telegram_config_v1") || "{}"));
+      if (!tgConfig.botToken) tgConfig.botToken = DEFAULT_TG.botToken;
+      if (!tgConfig.chatId) tgConfig.chatId = DEFAULT_TG.chatId;
+
       let pendingLeaveDelete = null;
 
-      // 1. 상단 네비게이션 바에 [복구·보안], [텔레그램], [잠금] 버튼 자동 추가
-      function injectNavButtons() {
+      // 파이어베이스 DB 안전 호출 헬퍼 (덮어쓰기 방지를 위해 독립 경로 systemConfig 사용)
+      function getRtdb() {
+        if (typeof firebase === "undefined") return null;
+        try { return firebase.app("jeungCarMainApp").database(); } catch (e) {}
+        try { return firebase.database(); } catch (e) {}
+        try { if (firebase.apps && firebase.apps[0]) return firebase.apps[0].database(); } catch (e) {}
+        return null;
+      }
+
+      // 1. 어제 만든 #telegramModal 내부를 서버 영구 저장형 UI로 자동 업그레이드
+      function upgradeTelegramModalUI() {
+        const tgModals = document.querySelectorAll("#telegramModal");
+        if (tgModals.length > 1) {
+          for (let i = 1; i < tgModals.length; i++) tgModals[i].remove();
+        }
+        let modal = document.getElementById("telegramModal");
+        if (!modal) {
+          modal = document.createElement("div");
+          modal.id = "telegramModal";
+          modal.className = "fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-3 sm:p-4 no-print";
+          document.body.appendChild(modal);
+        }
+
+        modal.innerHTML = `
+          <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-white flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <i class="fa-brands fa-telegram text-2xl"></i>
+                <div>
+                  <h3 class="font-extrabold text-base sm:text-lg">텔레그램 일일 알림 및 서버 설정</h3>
+                  <p class="text-[11px] text-sky-100">설정은 서버(systemConfig)에 영구 보관되며 매일 08:45 자동 발송됩니다.</p>
+                </div>
+              </div>
+              <button type="button" onclick="closeTelegramModal()" class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-4 text-sm">
+              <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-extrabold text-slate-700"><i class="fa-solid fa-server mr-1 text-sky-600"></i>텔레그램 연동 설정 (서버 영구 저장)</span>
+                  <span id="tgServerBadge" class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">서버 동기화됨</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-500 mb-1">봇 토큰 (Bot Token)</label>
+                    <input type="text" id="tgBotTokenInput" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono bg-white">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-500 mb-1">단체 채팅방 ID (Chat ID)</label>
+                    <input type="text" id="tgChatIdInput" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono bg-white">
+                  </div>
+                </div>
+                <div class="flex justify-end">
+                  <button type="button" onclick="saveTelegramConfigToServer()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i>설정 서버에 영구 저장
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap justify-between items-center gap-2">
+                <span class="text-xs font-bold text-slate-600">조회 및 발송 대상 일자:</span>
+                <div class="flex items-center gap-1.5">
+                  <input type="date" id="tgTargetDate" onchange="updateTelegramPreview()" class="border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold bg-white">
+                  <button type="button" onclick="setTgTargetOffset(0)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">오늘</button>
+                  <button type="button" onclick="setTgTargetOffset(1)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">내일</button>
+                </div>
+              </div>
+
+              <textarea id="tgPreviewBox" rows="9" class="w-full border border-slate-300 rounded-xl p-3 text-xs sm:text-sm font-mono bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 leading-relaxed"></textarea>
+
+              <div class="flex justify-end gap-2">
+                <button type="button" onclick="updateTelegramPreview()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer">미리보기 새로고침</button>
+                <button type="button" onclick="sendTelegramBriefingNow()" class="px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs sm:text-sm shadow-sm cursor-pointer">
+                  <i class="fa-brands fa-telegram mr-1"></i>단체방으로 즉시 발송
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. 상단 네비게이션 버튼 정리 (중복 제거 및 [복구·보안], [잠금] 추가)
+      function setupCleanNavButtons() {
+        const oldInjected = document.getElementById("injectedSecurityBtns");
+        if (oldInjected) oldInjected.remove();
+
+        const tgBtns = document.querySelectorAll('nav button[onclick*="openTelegramModal"]');
+        if (tgBtns.length > 1) {
+          for (let i = 1; i < tgBtns.length; i++) tgBtns[i].remove();
+        }
+
         const navRight = document.querySelector("nav .max-w-\\[1720px\\] > div:last-child");
-        if (!navRight || document.getElementById("injectedSecurityBtns")) return;
+        if (!navRight) return;
+
         const btnGroup = document.createElement("div");
         btnGroup.id = "injectedSecurityBtns";
         btnGroup.className = "flex items-center gap-1.5";
         btnGroup.innerHTML = `
-          <button onclick="openSecurityModal()" class="px-3 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1 cursor-pointer" title="삭제 데이터 복구 및 백업">
-            <i class="fa-solid fa-clock-rotate-left"></i> <span class="hidden sm:inline">복구·보안</span>
+          <button onclick="openSecurityModal()" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1.5 cursor-pointer" title="삭제 데이터 복구 및 백업">
+            <i class="fa-solid fa-clock-rotate-left"></i> <span>복구·보안</span>
           </button>
-          <button onclick="openTelegramModal()" class="px-3 py-2 rounded-xl text-xs font-extrabold bg-sky-500 hover:bg-sky-600 text-white shadow-xs flex items-center gap-1 cursor-pointer" title="텔레그램 일일 브리핑">
-            <i class="fa-brands fa-telegram"></i> <span class="hidden sm:inline">텔레그램</span>
-          </button>
-          <button onclick="lockSystemScreen()" class="px-2.5 py-2 rounded-xl text-xs font-extrabold bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center cursor-pointer" title="화면 즉시 잠금">
+          <button onclick="lockSystemScreen()" class="px-2.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center cursor-pointer" title="화면 즉시 잠금">
             <i class="fa-solid fa-lock"></i>
           </button>
         `;
         navRight.insertBefore(btnGroup, navRight.firstChild);
       }
 
-      // 2. Firebase(jeung-car)와 비밀번호 및 휴지통 실시간 동기화
-      function syncSecurityWithFirebase() {
-        if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return;
+      // 3. 파이어베이스 독립 경로(systemConfig) 실시간 동기화
+      function syncAllWithFirebase() {
+        const db = getRtdb();
+        if (!db) return;
         try {
-          const db = firebase.app("jeungCarMainApp").database();
-          db.ref("carDispatchApp/securityPin").on("value", snap => {
+          // (A) 텔레그램 설정 서버 동기화 (배차 저장 시 덮어써지지 않는 systemConfig 경로)
+          const tgRef = db.ref("systemConfig/telegram");
+          tgRef.on("value", snap => {
+            const val = snap.val();
+            if (val && val.botToken && val.chatId) {
+              tgConfig = val;
+              localStorage.setItem("yc_telegram_config_v1", JSON.stringify(tgConfig));
+            } else {
+              // 서버에 값이 비어있으면 기본 토큰/채팅방ID를 서버에 자동 등록
+              tgRef.set(tgConfig);
+            }
+            const tInput = document.getElementById("tgBotTokenInput");
+            const cInput = document.getElementById("tgChatIdInput");
+            if (tInput) tInput.value = tgConfig.botToken;
+            if (cInput) cInput.value = tgConfig.chatId;
+          });
+
+          // (B) 비밀번호 서버 동기화
+          db.ref("systemConfig/securityPin").on("value", snap => {
             if (snap.val()) {
               currentPin = String(snap.val());
               localStorage.setItem("yc_system_pin", currentPin);
             }
           });
-          db.ref("carDispatchApp/trashBin").on("value", snap => {
+
+          // (C) 휴지통 서버 동기화
+          db.ref("systemConfig/trashBin").on("value", snap => {
             if (snap.val()) {
               trashBin = Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val());
               localStorage.setItem("yc_trash_bin", JSON.stringify(trashBin));
@@ -4186,17 +4267,36 @@
         } catch (e) {}
       }
 
+      // 텔레그램 설정 서버 저장 함수
+      window.saveTelegramConfigToServer = function() {
+        const tokenVal = document.getElementById("tgBotTokenInput")?.value.trim();
+        const chatVal = document.getElementById("tgChatIdInput")?.value.trim();
+        if (!tokenVal || !chatVal) return alert("봇 토큰과 채팅방 ID를 모두 입력해주세요.");
+
+        tgConfig = { botToken: tokenVal, chatId: chatVal, autoTime: "08:45", updatedAt: new Date().toISOString() };
+        localStorage.setItem("yc_telegram_config_v1", JSON.stringify(tgConfig));
+
+        const db = getRtdb();
+        if (db) {
+          db.ref("systemConfig/telegram").set(tgConfig)
+            .then(() => alert("텔레그램 토큰과 채팅방 번호가 파이어베이스 서버에 영구 저장되었습니다!"))
+            .catch(() => alert("브라우저에 저장되었습니다."));
+        } else {
+          alert("설정이 저장되었습니다!");
+        }
+      };
+
       function saveTrashBin() {
-        if (trashBin.length > 50) trashBin = trashBin.slice(0, 50); // 최근 50건 유지
+        if (trashBin.length > 50) trashBin = trashBin.slice(0, 50);
         localStorage.setItem("yc_trash_bin", JSON.stringify(trashBin));
         renderTrashBin();
-        try {
-          const db = firebase.app("jeungCarMainApp").database();
-          db.ref("carDispatchApp/trashBin").set(trashBin);
-        } catch (e) {}
+        const db = getRtdb();
+        if (db) {
+          try { db.ref("systemConfig/trashBin").set(trashBin); } catch (e) {}
+        }
       }
 
-      // 3. 비밀번호 잠금 해제 및 변경
+      // 4. 비밀번호 잠금 해제 및 변경
       window.verifySystemPassword = function(e) {
         e.preventDefault();
         const input = document.getElementById("lockPasswordInput");
@@ -4224,16 +4324,19 @@
         if (!newPin || newPin.length < 4) return alert("새 비밀번호를 4자리 이상 입력해주세요.");
         currentPin = newPin;
         localStorage.setItem("yc_system_pin", newPin);
-        try {
-          firebase.app("jeungCarMainApp").database().ref("carDispatchApp/securityPin").set(newPin);
-        } catch (e) {}
+        const db = getRtdb();
+        if (db) {
+          try { db.ref("systemConfig/securityPin").set(newPin); } catch (e) {}
+        }
         document.getElementById("newSystemPinInput").value = "";
-        alert("비밀번호가 성공적으로 변경되었습니다.");
+        alert("비밀번호가 변경되어 서버에 저장되었습니다.");
       };
 
-      // 4. 삭제 가로채기 (자동 휴지통 백업 래퍼)
+      // 5. 삭제 가로채기 (자동 휴지통 백업)
       function hookDeleteFunctions() {
-        // (A) 차량 배차 삭제 가로채기
+        if (window.__ycDeleteHooked) return;
+        window.__ycDeleteHooked = true;
+
         const origConfirmDeleteBooking = window.confirmDeleteBooking;
         if (typeof origConfirmDeleteBooking === "function") {
           window.confirmDeleteBooking = function() {
@@ -4253,7 +4356,6 @@
           };
         }
 
-        // (B) 연가 내역 삭제 가로채기 (삭제 확인 모달이 뜰 때 미리 백업 데이터 확보)
         const origDeleteRecord = window.deleteRecord;
         if (typeof origDeleteRecord === "function") {
           window.deleteRecord = async function(id) {
@@ -4277,7 +4379,6 @@
           };
         }
 
-        // 연가 삭제 모달의 [삭제] 버튼 클릭 시 휴지통에 확정 저장
         const confirmBtn = document.getElementById("confirmActionBtn");
         if (confirmBtn) {
           confirmBtn.addEventListener("click", () => {
@@ -4290,7 +4391,7 @@
         }
       }
 
-      // 5. 휴지통 렌더링 및 1클릭 복원
+      // 6. 휴지통 렌더링 및 복원
       window.openSecurityModal = function() {
         renderTrashBin();
         const m = document.getElementById("securityVaultModal");
@@ -4331,7 +4432,6 @@
         const idx = trashBin.findIndex(t => t.trashId === trashId);
         if (idx === -1) return;
         const item = trashBin[idx];
-
         try {
           if (item.category === "차량배차" && item.payload) {
             if (!state.bookings) state.bookings = {};
@@ -4358,7 +4458,6 @@
         saveTrashBin();
       };
 
-      // 전체 데이터 JSON 백업 다운로드
       window.downloadFullSystemBackup = async function() {
         try {
           const [empRes, recRes] = await Promise.all([
@@ -4383,10 +4482,16 @@
         }
       };
 
-      // 6. 텔레그램 모달 및 발송 기능
+      // 7. 텔레그램 모달 열기/닫기 및 브리핑 발송
       window.openTelegramModal = function() {
+        upgradeTelegramModalUI();
+        document.getElementById("tgBotTokenInput").value = tgConfig.botToken || DEFAULT_TG.botToken;
+        document.getElementById("tgChatIdInput").value = tgConfig.chatId || DEFAULT_TG.chatId;
+
         const targetInput = document.getElementById("tgTargetDate");
-        if (!targetInput.value) targetInput.value = formatDate(new Date());
+        if (targetInput && !targetInput.value) {
+          targetInput.value = typeof formatDate === "function" ? formatDate(new Date()) : new Date().toISOString().slice(0, 10);
+        }
         updateTelegramPreview();
         const m = document.getElementById("telegramModal");
         m.classList.remove("hidden");
@@ -4395,20 +4500,23 @@
 
       window.closeTelegramModal = function() {
         const m = document.getElementById("telegramModal");
-        m.classList.add("hidden");
-        m.classList.remove("flex");
+        if (m) {
+          m.classList.add("hidden");
+          m.classList.remove("flex");
+        }
       };
 
       window.setTgTargetOffset = function(days) {
         const d = new Date();
         d.setDate(d.getDate() + days);
-        document.getElementById("tgTargetDate").value = formatDate(d);
+        document.getElementById("tgTargetDate").value = typeof formatDate === "function" ? formatDate(d) : d.toISOString().slice(0, 10);
         updateTelegramPreview();
       };
 
       window.updateTelegramPreview = async function() {
-        const targetDate = document.getElementById("tgTargetDate").value || formatDate(new Date());
+        const targetDate = document.getElementById("tgTargetDate")?.value || new Date().toISOString().slice(0, 10);
         const box = document.getElementById("tgPreviewBox");
+        if (!box) return;
         box.value = "일정을 불러오는 중입니다...";
 
         const dObj = new Date(targetDate + "T00:00:00");
@@ -4473,12 +4581,14 @@
       };
 
       window.sendTelegramBriefingNow = async function() {
-        const text = document.getElementById("tgPreviewBox").value;
+        const text = document.getElementById("tgPreviewBox")?.value;
+        const token = document.getElementById("tgBotTokenInput")?.value.trim() || tgConfig.botToken;
+        const chat = document.getElementById("tgChatIdInput")?.value.trim() || tgConfig.chatId;
         try {
-          const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+          const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text })
+            body: JSON.stringify({ chat_id: chat, text: text })
           });
           const data = await res.json();
           if (data.ok) alert("텔레그램 단체방으로 일정이 발송되었습니다!");
@@ -4489,408 +4599,25 @@
       };
 
       // 초기 실행
-      window.addEventListener("DOMContentLoaded", () => {
-        if (sessionStorage.getItem("yc_unlocked") === "true") {
-          document.getElementById("securityLockOverlay").classList.add("hidden");
-        } else {
-          setTimeout(() => document.getElementById("lockPasswordInput")?.focus(), 100);
-        }
-        injectNavButtons();
-        setTimeout(() => {
-          hookDeleteFunctions();
-          syncSecurityWithFirebase();
-        }, 800);
-      });
-    })();
-  </script>
-<!-- =================================================================
-       [보안 잠금(5493) · 휴지통 복구함 · 중복 텔레그램 버튼 자동 정리 블록]
-       오늘 추가했던 코드 대신 이 블록 하나만 </body> 바로 위에 두시면 됩니다.
-       ================================================================= -->
-
-  <!-- 1. 접속 비밀번호 잠금 화면 (초기 암호: 5493) -->
-  <div id="securityLockOverlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[99999] flex items-center justify-center p-4 select-none">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-7 text-center border border-slate-200">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white flex items-center justify-center text-2xl font-extrabold mx-auto mb-4 shadow-md">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <h2 class="text-xl font-extrabold text-slate-900">연천군정신건강복지센터</h2>
-      <p class="text-xs text-slate-500 mt-1 mb-6 font-medium">통합 업무 시스템 보호를 위해 비밀번호를 입력해주세요.</p>
-
-      <form onsubmit="verifySystemPassword(event)" class="space-y-3">
-        <input type="password" id="lockPasswordInput" inputmode="numeric" maxlength="12" placeholder="비밀번호 입력" required
-          class="w-full text-center text-xl tracking-[0.35em] font-extrabold border-2 border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200">
-        <p id="lockErrorMsg" class="text-xs text-red-600 font-bold hidden">비밀번호가 일치하지 않습니다.</p>
-        <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md transition cursor-pointer">
-          잠금 해제
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 2. 휴지통(삭제 복구함) & 전체 백업 & 비밀번호 변경 모달 -->
-  <div id="securityVaultModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-3 sm:p-4 no-print">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-      <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center">
-        <div class="flex items-center gap-2.5">
-          <i class="fa-solid fa-clock-rotate-left text-emerald-400 text-xl"></i>
-          <div>
-            <h3 class="font-extrabold text-base sm:text-lg">데이터 복구함(휴지통) 및 보안 관리</h3>
-            <p class="text-xs text-slate-300">삭제된 연가·차량배차 일정을 1클릭으로 복원하거나 전체 데이터를 백업합니다.</p>
-          </div>
-        </div>
-        <button onclick="closeSecurityModal()" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center cursor-pointer">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div class="p-5 overflow-y-auto space-y-5 text-sm flex-1">
-        <!-- 전체 데이터 백업 & 비밀번호 변경 바 -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 flex flex-col justify-between gap-2">
-            <div>
-              <h4 class="font-extrabold text-indigo-950 text-xs sm:text-sm"><i class="fa-solid fa-download mr-1 text-indigo-600"></i>전체 데이터 안전 백업</h4>
-              <p class="text-xs text-slate-600 mt-0.5">현재 등록된 모든 연가·직원·차량배차 데이터를 파일로 PC에 내려받습니다.</p>
-            </div>
-            <button onclick="downloadFullSystemBackup()" class="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer shadow-2xs">
-              <i class="fa-solid fa-file-arrow-down mr-1"></i>전체 백업 파일(.json) 다운로드
-            </button>
-          </div>
-
-          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between gap-2">
-            <div>
-              <h4 class="font-extrabold text-slate-800 text-xs sm:text-sm"><i class="fa-solid fa-key mr-1 text-amber-500"></i>접속 비밀번호 변경</h4>
-              <p class="text-xs text-slate-500 mt-0.5">초기 비밀번호(5493)를 새 번호로 변경합니다.</p>
-            </div>
-            <div class="flex gap-1.5">
-              <input type="password" id="newSystemPinInput" placeholder="새 비밀번호 입력" class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold bg-white">
-              <button onclick="changeSystemPassword()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold cursor-pointer shrink-0">
-                변경 저장
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 삭제된 데이터 휴지통 목록 -->
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <h4 class="font-extrabold text-slate-800"><i class="fa-regular fa-trash-can mr-1 text-rose-500"></i>최근 삭제된 항목 (휴지통)</h4>
-            <button onclick="clearAllTrashBin()" class="text-xs text-slate-400 hover:text-red-600 font-bold cursor-pointer">휴지통 비우기</button>
-          </div>
-          <div class="border border-slate-200 rounded-xl overflow-hidden">
-            <table class="w-full text-left border-collapse text-xs sm:text-sm">
-              <thead>
-                <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold">
-                  <th class="p-2.5 whitespace-nowrap">구분</th>
-                  <th class="p-2.5">삭제된 내용</th>
-                  <th class="p-2.5 whitespace-nowrap">삭제 일시</th>
-                  <th class="p-2.5 text-right whitespace-nowrap">복구</th>
-                </tr>
-              </thead>
-              <tbody id="trashBinTableBody" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    (function() {
-      const DEFAULT_PIN = "5493";
-      const LEAVE_FIRESTORE_URL = "https://firestore.googleapis.com/v1/projects/yeoncheon-leave/databases/(default)/documents";
-
-      // 어제 추가한 텔레그램 설정(yc_telegram_config_v1)에 토큰 및 채팅방 ID 자동 연동
-      try {
-        const existingTg = JSON.parse(localStorage.getItem("yc_telegram_config_v1") || "{}");
-        existingTg.botToken = existingTg.botToken || "9212624358:AAH8ouMObkIXK59NOsICoSqVwAY_nPo9VQk";
-        existingTg.chatId = existingTg.chatId || "-1004334674704";
-        existingTg.autoTime = existingTg.autoTime || "08:45";
-        localStorage.setItem("yc_telegram_config_v1", JSON.stringify(existingTg));
-      } catch (e) {}
-
-      let currentPin = localStorage.getItem("yc_system_pin") || DEFAULT_PIN;
-      let trashBin = JSON.parse(localStorage.getItem("yc_trash_bin") || "[]");
-      let pendingLeaveDelete = null;
-
-      // 1. 중복 생성된 텔레그램 버튼/모달 자동 정리 및 [복구·보안], [잠금] 버튼 추가
-      function setupCleanNavButtons() {
-        // (A) 만약 #telegramModal이 2개 이상 있다면 첫 번째(어제 만든 원본)만 남기고 제거
-        const tgModals = document.querySelectorAll("#telegramModal");
-        if (tgModals.length > 1) {
-          for (let i = 1; i < tgModals.length; i++) tgModals[i].remove();
-        }
-
-        // (B) 이전에 주입된 버튼 그룹이 있다면 초기화
-        const oldInjected = document.getElementById("injectedSecurityBtns");
-        if (oldInjected) oldInjected.remove();
-
-        // (C) 상단바에 텔레그램 버튼(openTelegramModal)이 2개 이상이면 첫 번째만 남기고 모두 제거
-        const tgBtns = document.querySelectorAll('nav button[onclick*="openTelegramModal"]');
-        if (tgBtns.length > 1) {
-          for (let i = 1; i < tgBtns.length; i++) tgBtns[i].remove();
-        }
-
-        // (D) [복구·보안] 및 [🔒 잠금] 버튼만 깔끔하게 추가
-        const navRight = document.querySelector("nav .max-w-\\[1720px\\] > div:last-child");
-        if (!navRight) return;
-
-        const btnGroup = document.createElement("div");
-        btnGroup.id = "injectedSecurityBtns";
-        btnGroup.className = "flex items-center gap-1.5";
-        btnGroup.innerHTML = `
-          <button onclick="openSecurityModal()" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1.5 cursor-pointer" title="삭제 데이터 복구 및 백업">
-            <i class="fa-solid fa-clock-rotate-left"></i> <span>복구·보안</span>
-          </button>
-          <button onclick="lockSystemScreen()" class="px-2.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center cursor-pointer" title="화면 즉시 잠금">
-            <i class="fa-solid fa-lock"></i>
-          </button>
-        `;
-        navRight.insertBefore(btnGroup, navRight.firstChild);
-      }
-
-      // 2. Firebase(jeung-car)와 비밀번호 및 휴지통 실시간 동기화
-      function syncSecurityWithFirebase() {
-        if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return;
-        try {
-          const db = firebase.app("jeungCarMainApp").database();
-          db.ref("carDispatchApp/securityPin").on("value", snap => {
-            if (snap.val()) {
-              currentPin = String(snap.val());
-              localStorage.setItem("yc_system_pin", currentPin);
-            }
-          });
-          db.ref("carDispatchApp/trashBin").on("value", snap => {
-            if (snap.val()) {
-              trashBin = Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val());
-              localStorage.setItem("yc_trash_bin", JSON.stringify(trashBin));
-              renderTrashBin();
-            }
-          });
-        } catch (e) {}
-      }
-
-      function saveTrashBin() {
-        if (trashBin.length > 50) trashBin = trashBin.slice(0, 50);
-        localStorage.setItem("yc_trash_bin", JSON.stringify(trashBin));
-        renderTrashBin();
-        try {
-          const db = firebase.app("jeungCarMainApp").database();
-          db.ref("carDispatchApp/trashBin").set(trashBin);
-        } catch (e) {}
-      }
-
-      // 3. 비밀번호 잠금 해제 및 변경
-      window.verifySystemPassword = function(e) {
-        e.preventDefault();
-        const input = document.getElementById("lockPasswordInput");
-        const err = document.getElementById("lockErrorMsg");
-        if (input.value.trim() === currentPin) {
-          sessionStorage.setItem("yc_unlocked", "true");
-          document.getElementById("securityLockOverlay").classList.add("hidden");
-          input.value = "";
-          err.classList.add("hidden");
-        } else {
-          err.classList.remove("hidden");
-          input.value = "";
-          input.focus();
-        }
-      };
-
-      window.lockSystemScreen = function() {
-        sessionStorage.removeItem("yc_unlocked");
-        document.getElementById("securityLockOverlay").classList.remove("hidden");
-        setTimeout(() => document.getElementById("lockPasswordInput")?.focus(), 50);
-      };
-
-      window.changeSystemPassword = function() {
-        const newPin = document.getElementById("newSystemPinInput").value.trim();
-        if (!newPin || newPin.length < 4) return alert("새 비밀번호를 4자리 이상 입력해주세요.");
-        currentPin = newPin;
-        localStorage.setItem("yc_system_pin", newPin);
-        try {
-          firebase.app("jeungCarMainApp").database().ref("carDispatchApp/securityPin").set(newPin);
-        } catch (e) {}
-        document.getElementById("newSystemPinInput").value = "";
-        alert("비밀번호가 성공적으로 변경되었습니다.");
-      };
-
-      // 4. 삭제 가로채기 (자동 휴지통 백업)
-      function hookDeleteFunctions() {
-        if (window.__ycDeleteHooked) return;
-        window.__ycDeleteHooked = true;
-
-        const origConfirmDeleteBooking = window.confirmDeleteBooking;
-        if (typeof origConfirmDeleteBooking === "function") {
-          window.confirmDeleteBooking = function() {
-            const id = document.getElementById("bookingId")?.value;
-            if (id && window.state && state.bookings && state.bookings[id]) {
-              const b = state.bookings[id];
-              trashBin.unshift({
-                trashId: "tr_" + Date.now(),
-                category: "차량배차",
-                summary: `[${b.date} ${b.startTime}~${b.endTime}] ${b.vehicle} - ${b.driver || ""} (${b.memo || ""})`,
-                deletedAt: new Date().toLocaleString("ko-KR"),
-                payload: b
-              });
-              saveTrashBin();
-            }
-            origConfirmDeleteBooking.apply(this, arguments);
-          };
-        }
-
-        const origDeleteRecord = window.deleteRecord;
-        if (typeof origDeleteRecord === "function") {
-          window.deleteRecord = async function(id) {
-            pendingLeaveDelete = null;
-            try {
-              const res = await fetch(`${LEAVE_FIRESTORE_URL}/leave_records/${id}`);
-              if (res.ok) {
-                const doc = await res.json();
-                const f = doc.fields || {};
-                pendingLeaveDelete = {
-                  trashId: "tr_" + Date.now(),
-                  category: "연가·근무",
-                  docId: id,
-                  summary: `[${f.leaveType?.stringValue || "연가"}] ${f.dateStr?.stringValue || ""} (${f.reason?.stringValue || "사유없음"})`,
-                  deletedAt: new Date().toLocaleString("ko-KR"),
-                  fields: f
-                };
-              }
-            } catch (e) {}
-            origDeleteRecord.apply(this, arguments);
-          };
-        }
-
-        const confirmBtn = document.getElementById("confirmActionBtn");
-        if (confirmBtn) {
-          confirmBtn.addEventListener("click", () => {
-            if (pendingLeaveDelete) {
-              trashBin.unshift(pendingLeaveDelete);
-              pendingLeaveDelete = null;
-              saveTrashBin();
-            }
-          }, true);
-        }
-      }
-
-      // 5. 휴지통 렌더링 및 1클릭 복원
-      window.openSecurityModal = function() {
-        renderTrashBin();
-        const m = document.getElementById("securityVaultModal");
-        m.classList.remove("hidden");
-        m.classList.add("flex");
-      };
-
-      window.closeSecurityModal = function() {
-        const m = document.getElementById("securityVaultModal");
-        m.classList.add("hidden");
-        m.classList.remove("flex");
-      };
-
-      function renderTrashBin() {
-        const tbody = document.getElementById("trashBinTableBody");
-        if (!tbody) return;
-        if (!trashBin || trashBin.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">삭제된 데이터가 없습니다.</td></tr>`;
-          return;
-        }
-        tbody.innerHTML = trashBin.map(item => `
-          <tr class="hover:bg-slate-50">
-            <td class="p-2.5 font-bold whitespace-nowrap">
-              <span class="px-2 py-0.5 rounded text-xs ${item.category === '차량배차' ? 'bg-blue-100 text-blue-800' : 'bg-indigo-100 text-indigo-800'}">${item.category}</span>
-            </td>
-            <td class="p-2.5 font-medium text-slate-800">${item.summary}</td>
-            <td class="p-2.5 text-xs text-slate-500 whitespace-nowrap">${item.deletedAt}</td>
-            <td class="p-2.5 text-right whitespace-nowrap">
-              <button onclick="restoreTrashItem('${item.trashId}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
-                <i class="fa-solid fa-rotate-left mr-0.5"></i>복원
-              </button>
-            </td>
-          </tr>
-        `).join("");
-      }
-
-      window.restoreTrashItem = async function(trashId) {
-        const idx = trashBin.findIndex(t => t.trashId === trashId);
-        if (idx === -1) return;
-        const item = trashBin[idx];
-
-        try {
-          if (item.category === "차량배차" && item.payload) {
-            if (!state.bookings) state.bookings = {};
-            state.bookings[item.payload.id] = item.payload;
-            saveToDataSource();
-          } else if (item.category === "연가·근무" && item.fields) {
-            await fetch(`${LEAVE_FIRESTORE_URL}/leave_records?documentId=${item.docId}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ fields: item.fields })
-            });
-          }
-          trashBin.splice(idx, 1);
-          saveTrashBin();
-          alert("데이터가 원래대로 복원되었습니다!");
-        } catch (e) {
-          alert("복원 중 오류가 발생했습니다: " + e.message);
-        }
-      };
-
-      window.clearAllTrashBin = function() {
-        if (!confirm("휴지통의 모든 기록을 비우시겠습니까?")) return;
-        trashBin = [];
-        saveTrashBin();
-      };
-
-      window.downloadFullSystemBackup = async function() {
-        try {
-          const [empRes, recRes] = await Promise.all([
-            fetch(`${LEAVE_FIRESTORE_URL}/employees?pageSize=300`).then(r => r.json()),
-            fetch(`${LEAVE_FIRESTORE_URL}/leave_records?pageSize=1000`).then(r => r.json())
-          ]);
-          const backupObj = {
-            backupDate: new Date().toISOString(),
-            carDispatchData: window.state || {},
-            leaveEmployees: empRes.documents || [],
-            leaveRecords: recRes.documents || []
-          };
-          const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `연천군정신건강복지센터_통합백업_${formatDate(new Date())}.json`;
-          a.click();
-          URL.revokeObjectURL(url);
-        } catch (e) {
-          alert("백업 파일 생성 중 오류: " + e.message);
-        }
-      };
-
-      // 초기 실행
-      function initSecurityPlugin() {
-        // 중복된 잠금 오버레이나 복구 모달이 있으면 정리
-        const locks = document.querySelectorAll("#securityLockOverlay");
-        if (locks.length > 1) { for (let i = 1; i < locks.length; i++) locks[i].remove(); }
-        const vaults = document.querySelectorAll("#securityVaultModal");
-        if (vaults.length > 1) { for (let i = 1; i < vaults.length; i++) vaults[i].remove(); }
-
+      function initAllPlugins() {
         if (sessionStorage.getItem("yc_unlocked") === "true") {
           document.getElementById("securityLockOverlay")?.classList.add("hidden");
         } else {
           setTimeout(() => document.getElementById("lockPasswordInput")?.focus(), 100);
         }
+        upgradeTelegramModalUI();
         setupCleanNavButtons();
         setTimeout(() => {
-          setupCleanNavButtons(); // 혹시 지연 생성된 중복 버튼까지 2차 정리
+          setupCleanNavButtons();
           hookDeleteFunctions();
-          syncSecurityWithFirebase();
+          syncAllWithFirebase();
         }, 800);
       }
 
       if (document.readyState === "loading") {
-        window.addEventListener("DOMContentLoaded", initSecurityPlugin);
+        window.addEventListener("DOMContentLoaded", initAllPlugins);
       } else {
-        initSecurityPlugin();
+        initAllPlugins();
       }
     })();
   </script>
