@@ -4341,7 +4341,7 @@
         if (typeof origConfirmDeleteBooking === "function") {
           window.confirmDeleteBooking = function() {
             const id = document.getElementById("bookingId")?.value;
-            if (id && window.state && state.bookings && state.bookings[id]) {
+            if (id && typeof state !== "undefined" && state.bookings && state.bookings[id]) {
               const b = state.bookings[id];
               trashBin.unshift({
                 trashId: "tr_" + Date.now(),
@@ -4550,8 +4550,18 @@
           });
         } catch (e) {}
 
-        const bookings = Object.values((window.state && state.bookings) ? state.bookings : {})
-          .filter(b => b && b.date === targetDate)
+let rawBookings = (typeof state !== "undefined" && state && state.bookings) ? state.bookings : null;
+        if (!rawBookings || Object.keys(rawBookings).length === 0) {
+          try {
+            const db = getRtdb();
+            if (db) {
+              const snap = await db.ref("carDispatchApp/bookings").once("value");
+              rawBookings = snap.val() || {};
+            }
+          } catch (e) {}
+        }
+        const bookings = Object.values(rawBookings || {})
+          .filter(b => b && String(b.date).trim() === targetDate)
           .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
 
         let lines = [
