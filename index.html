@@ -903,6 +903,9 @@
           <button onclick="openReportModal()" class="inline-flex items-center gap-2 text-sm sm:text-base px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm transition cursor-pointer">
             <i class="fa-solid fa-print"></i> 월별 배차 내역 출력 / 엑셀
           </button>
+          <button onclick="openTripLogModal()" class="inline-flex items-center gap-2 text-sm sm:text-base px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-sm transition cursor-pointer">
+            <i class="fa-solid fa-file-lines"></i> 출장일지 작성
+          </button>
           <button onclick="openGuideModal()" class="inline-flex items-center gap-2 text-sm sm:text-base px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition cursor-pointer">
             <i class="fa-solid fa-database"></i> 연동 설정
           </button>
@@ -1148,6 +1151,46 @@
               class="w-full text-base border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
 
+          <!-- 출장일지 정보 (선택 입력) -->
+          <details id="tripLogDetails" class="bg-amber-50/70 rounded-xl border border-amber-200">
+            <summary class="cursor-pointer select-none px-4 py-3 text-sm font-bold text-amber-900 flex items-center gap-2">
+              <i class="fa-solid fa-file-lines text-amber-600"></i> 출장일지 정보
+              <span class="font-medium text-slate-500">(선택 · 비워두면 메모로 자동 작성)</span>
+            </summary>
+            <div class="px-4 pb-4 space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">출장목적</label>
+                  <select id="bookingPurpose" class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <option value="">자동 (메모로 추정)</option>
+                    <option value="교육">교육</option>
+                    <option value="행사">행사</option>
+                    <option value="캠페인">캠페인</option>
+                    <option value="세미나">세미나</option>
+                    <option value="회의">회의</option>
+                    <option value="직원교육">직원교육</option>
+                    <option value="기타">기타</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">출장지</label>
+                  <input type="text" id="bookingDestination" placeholder="예: 연천군청 2층 회의실"
+                    class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">제목</label>
+                <input type="text" id="bookingTripTitle" placeholder="예: 2026년 정신건강 실무자 간담회"
+                  class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">내용</label>
+                <textarea id="bookingTripContent" rows="3" placeholder="출장 내용을 간단히 적어주세요."
+                  class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y"></textarea>
+              </div>
+            </div>
+          </details>
+
           <!-- 하단 버튼 -->
           <div class="flex justify-between items-center pt-4 border-t border-slate-200">
             <div id="deleteConfirmArea" class="hidden items-center gap-2">
@@ -1232,6 +1275,58 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- [차량 모달 4] 출장일지 자동 작성 모달 -->
+    <div id="tripLogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-3 sm:p-6 no-print">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-200">
+        <div class="px-5 sm:px-6 py-4 bg-amber-500 text-white flex justify-between items-center gap-3">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-file-lines text-xl"></i>
+            <h3 class="font-extrabold text-lg sm:text-xl">출장일지 자동 작성</h3>
+          </div>
+          <button onclick="closeTripLogModal()" class="w-9 h-9 rounded-lg bg-amber-600/70 hover:bg-amber-700 flex items-center justify-center transition cursor-pointer">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <div class="px-5 sm:px-6 py-4 bg-amber-50 border-b border-amber-200 grid grid-cols-1 sm:grid-cols-[10rem_1fr_auto] gap-3 items-end">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">조회 월</label>
+            <input type="month" id="tripLogMonth" onchange="generateTripLog()"
+              class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">출장자 이름 <span class="font-medium text-slate-500">(운전자·동행자 모두 포함)</span></label>
+            <input type="text" id="tripLogTraveler" list="tripLogMemberList" placeholder="이름 입력 또는 선택" autocomplete="off"
+              onkeydown="if(event.key==='Enter'){ event.preventDefault(); generateTripLog(); }"
+              class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <datalist id="tripLogMemberList"></datalist>
+          </div>
+          <button onclick="generateTripLog()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-extrabold transition cursor-pointer shadow-xs">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>일지 생성
+          </button>
+        </div>
+
+        <div id="tripLogInfo" class="px-5 sm:px-6 pt-3 text-sm font-bold text-slate-700 leading-relaxed"></div>
+
+        <div class="px-5 sm:px-6 py-3 flex-1 min-h-0 flex flex-col">
+          <textarea id="tripLogOutput" spellcheck="false"
+            placeholder="월과 출장자 이름을 선택한 뒤 [일지 생성]을 누르면 한 달 치 출장일지가 여기에 만들어집니다."
+            class="w-full flex-1 min-h-[320px] font-mono text-sm leading-relaxed border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"></textarea>
+          <p class="text-xs text-slate-500 mt-2"><i class="fa-solid fa-circle-info mr-1 text-amber-600"></i>글상자 안에서 직접 고친 뒤 복사/다운로드할 수 있어요. (다시 [일지 생성]을 누르면 수정 내용이 초기화됩니다.)</p>
+        </div>
+
+        <div class="px-5 sm:px-6 py-4 border-t border-slate-200 flex flex-wrap justify-end gap-2.5 bg-white">
+          <button onclick="closeTripLogModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition cursor-pointer">닫기</button>
+          <button onclick="downloadTripLog()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-download"></i> TXT 다운로드
+          </button>
+          <button onclick="copyTripLog()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-extrabold transition cursor-pointer flex items-center gap-1.5">
+            <i class="fa-regular fa-copy"></i> 전체 복사
+          </button>
         </div>
       </div>
     </div>
@@ -3406,6 +3501,7 @@
         document.getElementById('startTime').value = b.startTime;
         document.getElementById('endTime').value = b.endTime;
         document.getElementById('bookingMemo').value = b.memo;
+        fillTripLogFields(b);
         document.getElementById('extraCompanions').value = customCompanions.join(', ');
 
         renderCompanionCheckboxes(driverName, memberCompanions);
@@ -3425,6 +3521,7 @@
         document.querySelector('input[name="meridiem"][value="AM"]').checked = true;
         updateDefaultTime('AM');
         document.getElementById('bookingMemo').value = '';
+        fillTripLogFields(null);
         document.getElementById('extraCompanions').value = '';
 
         renderCompanionCheckboxes(defaultDriver, []);
@@ -3509,7 +3606,12 @@
       const extraCompanions = extraRaw ? extraRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
       const companions = [...new Set([...checkedCompanions, ...extraCompanions])];
 
-      const newBooking = { id, date, vehicle, driver, companions, meridiem, startTime, endTime, memo };
+      const purpose = document.getElementById('bookingPurpose').value || '';
+      const destination = document.getElementById('bookingDestination').value.trim();
+      const tripTitle = document.getElementById('bookingTripTitle').value.trim();
+      const tripContent = document.getElementById('bookingTripContent').value.trim();
+
+      const newBooking = { id, date, vehicle, driver, companions, meridiem, startTime, endTime, memo, purpose, destination, tripTitle, tripContent };
 
       const conflict = Object.values(state.bookings || {}).find(b => {
         if (b.id === id || b.date !== date || b.vehicle !== vehicle) return false;
@@ -3719,6 +3821,224 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
+    // =====================================================================
+    // 출장일지 자동 작성 (배차 내역 → 출장자별 월간 TXT)
+    // =====================================================================
+    const TRIP_PURPOSES = ['교육', '행사', '캠페인', '세미나', '회의', '직원교육', '기타'];
+    const TRIP_TRAVELER_KEY = 'yc_trip_log_traveler';
+    const TRIP_DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+    // 배차 등록창의 출장일지 입력칸 채우기 (b가 null이면 초기화)
+    function fillTripLogFields(b) {
+      const purpose = b && TRIP_PURPOSES.includes(b.purpose) ? b.purpose : '';
+      const destination = (b && b.destination) || '';
+      const tripTitle = (b && b.tripTitle) || '';
+      const tripContent = (b && b.tripContent) || '';
+      document.getElementById('bookingPurpose').value = purpose;
+      document.getElementById('bookingDestination').value = destination;
+      document.getElementById('bookingTripTitle').value = tripTitle;
+      document.getElementById('bookingTripContent').value = tripContent;
+      document.getElementById('tripLogDetails').open = !!(purpose || destination || tripTitle || tripContent);
+    }
+
+    // 출장목적을 지정하지 않은 경우 메모 키워드로 추정 (순서 중요: 직원교육 > 교육)
+    function inferTripPurpose(text) {
+      const t = String(text || '');
+      if (/직원\s*교육|직무\s*교육|보수\s*교육|연수/.test(t)) return '직원교육';
+      if (/세미나|포럼|심포지엄|학술/.test(t)) return '세미나';
+      if (/캠페인/.test(t)) return '캠페인';
+      if (/회의|간담회|협의|논의|운영위/.test(t)) return '회의';
+      if (/교육/.test(t)) return '교육';
+      if (/행사|축제|기념식|박람회|체육대회|개소식/.test(t)) return '행사';
+      return '기타';
+    }
+
+    // 배차 1건에서 검색한 출장자를 찾아 반환 (운전자/동행자, 정확히 일치 우선)
+    function findTripMember(b, query) {
+      const names = [b.driver || b.member, ...(Array.isArray(b.companions) ? b.companions : [])].filter(Boolean);
+      return names.find(n => n === query) || names.find(n => n.includes(query)) || null;
+    }
+
+    function formatTripDateTime(b) {
+      const [y, m, d] = String(b.date).split('-').map(Number);
+      const dow = TRIP_DAY_NAMES[new Date(y, m - 1, d).getDay()];
+      return `${b.date}(${dow}) ${b.startTime}~${b.endTime}`;
+    }
+
+    // 순수 함수: 배차 목록 → 출장일지 텍스트 (UI와 분리)
+    function buildTripLogText(month, query) {
+      const [yy, mm] = month.split('-');
+      const list = Object.values(state.bookings || {})
+        .filter(b => b && b.date && String(b.date).startsWith(month))
+        .map(b => ({ b, me: findTripMember(b, query) }))
+        .filter(x => x.me)
+        .sort((x, y) => x.b.date !== y.b.date
+          ? x.b.date.localeCompare(y.b.date)
+          : String(x.b.startTime).localeCompare(String(y.b.startTime)));
+
+      let inferredCount = 0;
+      let emptyContentCount = 0;
+
+      const entries = list.map(({ b, me }, idx) => {
+        const names = [b.driver || b.member, ...(Array.isArray(b.companions) ? b.companions : [])].filter(Boolean);
+        const others = [...new Set(names.filter(n => n !== me))];
+
+        const memo = (b.memo || '').trim();
+        const place = (b.destination || '').trim() || memo;
+        const title = (b.tripTitle || '').trim() || memo;
+        const content = (b.tripContent || '').trim();
+        const when = formatTripDateTime(b);
+
+        let purpose = TRIP_PURPOSES.includes(b.purpose) ? b.purpose : '';
+        if (!purpose) {
+          purpose = inferTripPurpose(`${title} ${memo}`);
+          inferredCount++;
+        }
+        if (!content) emptyContentCount++;
+
+        const contentLines = content ? content.split(/\r?\n/).join('\n        ') : '';
+
+        return [
+          `■ 출장 ${idx + 1}`,
+          `일시: ${when}`,
+          `출장지: ${place}`,
+          `출장목적: ${purpose}`,
+          `동행자: ${others.length ? others.join(', ') : '없음'}`,
+          `내용`,
+          `  - 제목: ${title}`,
+          `  - 일시: ${when}`,
+          `  - 장소: ${place}`,
+          `  - 내용: ${contentLines}`,
+          `  - 이동수단: ${b.vehicle || ''}`
+        ].join('\n');
+      });
+
+      const bar = '='.repeat(40);
+      const text = list.length === 0 ? '' : [
+        bar,
+        `[출장일지] ${yy}년 ${Number(mm)}월 · ${query} (총 ${list.length}건)`,
+        bar,
+        '',
+        entries.join('\n\n' + '-'.repeat(40) + '\n\n')
+      ].join('\n') + '\n';
+
+      return { text, count: list.length, inferredCount, emptyContentCount };
+    }
+
+    function openTripLogModal() {
+      document.getElementById('tripLogMonth').value =
+        `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+      document.getElementById('tripLogMemberList').innerHTML = state.members
+        .map(m => `<option value="${escapeHtml(m)}"></option>`).join('');
+
+      const nameInput = document.getElementById('tripLogTraveler');
+      if (!nameInput.value) {
+        try { nameInput.value = localStorage.getItem(TRIP_TRAVELER_KEY) || ''; } catch (e) {}
+      }
+
+      const modal = document.getElementById('tripLogModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      if (nameInput.value.trim()) {
+        generateTripLog();
+      } else {
+        document.getElementById('tripLogOutput').value = '';
+        document.getElementById('tripLogInfo').textContent = '';
+        setTimeout(() => nameInput.focus(), 50);
+      }
+    }
+
+    function closeTripLogModal() {
+      const modal = document.getElementById('tripLogModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function generateTripLog() {
+      const month = document.getElementById('tripLogMonth').value;
+      const query = document.getElementById('tripLogTraveler').value.trim();
+      const out = document.getElementById('tripLogOutput');
+      const info = document.getElementById('tripLogInfo');
+
+      if (!/^\d{4}-\d{2}$/.test(month)) {
+        showCarToast('조회 월을 선택해 주세요. (예: 2026-10)', 'warn');
+        return;
+      }
+      if (!query) {
+        showCarToast('출장자 이름을 입력해 주세요.', 'warn');
+        out.value = '';
+        info.textContent = '';
+        return;
+      }
+      try { localStorage.setItem(TRIP_TRAVELER_KEY, query); } catch (e) {}
+
+      const [yy, mm] = month.split('-');
+      const result = buildTripLogText(month, query);
+      out.value = result.text;
+
+      if (result.count === 0) {
+        info.innerHTML = `<span class="text-red-600">'${escapeHtml(query)}'님의 ${yy}년 ${Number(mm)}월 배차(출장) 내역이 없습니다. 이름과 월을 확인해 주세요.</span>`;
+        return;
+      }
+
+      const notes = [];
+      if (result.inferredCount > 0) notes.push(`출장목적 미지정 ${result.inferredCount}건은 메모 내용으로 추정했어요`);
+      if (result.emptyContentCount > 0) notes.push(`'내용'이 비어 있는 ${result.emptyContentCount}건은 직접 채워 주세요`);
+      info.innerHTML = `<span class="text-amber-700">${escapeHtml(query)}</span> · ${yy}년 ${Number(mm)}월 · 총 ${result.count}건` +
+        (notes.length ? `<div class="text-xs font-medium text-slate-500 mt-0.5">※ ${notes.join(' / ')}</div>` : '');
+    }
+
+    async function copyTripLog() {
+      const out = document.getElementById('tripLogOutput');
+      if (!out.value.trim()) {
+        showCarToast('복사할 출장일지가 없습니다. 먼저 [일지 생성]을 눌러 주세요.', 'warn');
+        return;
+      }
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(out.value);
+          showCarToast('출장일지가 클립보드에 복사되었습니다.', 'success');
+          return;
+        }
+        throw new Error('clipboard unavailable');
+      } catch (e) {
+        out.focus();
+        out.select();
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch (err) {}
+        if (ok) {
+          showCarToast('출장일지가 클립보드에 복사되었습니다.', 'success');
+        } else {
+          showCarToast('자동 복사가 차단되었습니다. 선택된 상태에서 Ctrl+C로 복사해 주세요.', 'warn');
+        }
+      }
+    }
+
+    function downloadTripLog() {
+      const out = document.getElementById('tripLogOutput');
+      if (!out.value.trim()) {
+        showCarToast('다운로드할 출장일지가 없습니다. 먼저 [일지 생성]을 눌러 주세요.', 'warn');
+        return;
+      }
+      const month = document.getElementById('tripLogMonth').value;
+      const query = document.getElementById('tripLogTraveler').value.trim();
+      const fileName = `출장일지_${month}_${query}.txt`.replace(/[\\/:*?"<>|]/g, '_');
+
+      // 윈도우 메모장 호환: UTF-8 BOM + CRLF
+      const content = '\uFEFF' + out.value.replace(/\r?\n/g, '\r\n');
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showCarToast('출장일지 TXT 파일이 다운로드되었습니다.', 'success');
+    }
+
     function escapeHtml(str) {
       return String(str ?? '')
         .replace(/&/g, '&amp;')
@@ -3742,6 +4062,7 @@
       forceSaveBooking, hideConflictBanner,
       toggleDeleteConfirm, confirmDeleteBooking,
       openReportModal, closeReportModal, printCarReport, exportMonthlyCSV,
+      openTripLogModal, closeTripLogModal, generateTripLog, copyTripLog, downloadTripLog,
       openGuideModal, closeGuideModal, applyCustomFirebase, fillPresetUrl,
       formatDate
     });
