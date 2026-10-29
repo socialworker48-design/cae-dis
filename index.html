@@ -1144,49 +1144,48 @@
             </div>
           </div>
 
-          <!-- 행선지 및 용무 -->
-          <div>
-            <label class="block text-sm font-bold text-slate-700 mb-1.5">행선지 및 운행 용무 (메모)</label>
-            <input type="text" id="bookingMemo" placeholder="예: 전곡읍 가정방문, 군청 간담회 참석, 물품 수령 등" required
-              class="w-full text-base border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <!-- 행선지 / 내용 -->
+          <div class="space-y-3.5">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1.5">
+                <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>행선지 <span class="font-medium text-slate-500">(필수)</span>
+              </label>
+              <input type="text" id="bookingDestination" required placeholder="예: 연천군청 2층 회의실, 전곡읍 대상자 가정, 동두천시 ○○센터"
+                class="w-full text-base border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1.5">
+                <i class="fa-solid fa-comment-dots text-blue-600 mr-1"></i>내용 <span class="font-medium text-slate-500">(용무 · 출장일지의 '내용'으로 사용)</span>
+              </label>
+              <textarea id="bookingContent" rows="2" placeholder="예: 유관기관 실무자 간담회 참석, 후원물품 수령"
+                class="w-full text-base border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"></textarea>
+            </div>
           </div>
 
-          <!-- 출장일지 정보 (선택 입력) -->
+          <!-- 출장일지 추가 정보 (선택 입력) -->
           <details id="tripLogDetails" class="bg-amber-50/70 rounded-xl border border-amber-200">
             <summary class="cursor-pointer select-none px-4 py-3 text-sm font-bold text-amber-900 flex items-center gap-2">
-              <i class="fa-solid fa-file-lines text-amber-600"></i> 출장일지 정보
-              <span class="font-medium text-slate-500">(선택 · 비워두면 메모로 자동 작성)</span>
+              <i class="fa-solid fa-file-lines text-amber-600"></i> 출장일지 추가 정보
+              <span class="font-medium text-slate-500">(선택 · 비워두면 자동 작성)</span>
             </summary>
-            <div class="px-4 pb-4 space-y-3">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 mb-1">출장목적</label>
-                  <select id="bookingPurpose" class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    <option value="">자동 (메모로 추정)</option>
-                    <option value="교육">교육</option>
-                    <option value="행사">행사</option>
-                    <option value="캠페인">캠페인</option>
-                    <option value="세미나">세미나</option>
-                    <option value="회의">회의</option>
-                    <option value="직원교육">직원교육</option>
-                    <option value="기타">기타</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 mb-1">출장지</label>
-                  <input type="text" id="bookingDestination" placeholder="예: 연천군청 2층 회의실"
-                    class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500">
-                </div>
+            <div class="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">출장목적</label>
+                <select id="bookingPurpose" class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                  <option value="">자동 (내용으로 추정)</option>
+                  <option value="교육">교육</option>
+                  <option value="행사">행사</option>
+                  <option value="캠페인">캠페인</option>
+                  <option value="세미나">세미나</option>
+                  <option value="회의">회의</option>
+                  <option value="직원교육">직원교육</option>
+                  <option value="기타">기타</option>
+                </select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">제목</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1">제목 <span class="font-medium text-slate-500">(비우면 내용 첫 줄)</span></label>
                 <input type="text" id="bookingTripTitle" placeholder="예: 2026년 정신건강 실무자 간담회"
                   class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">내용</label>
-                <textarea id="bookingTripContent" rows="3" placeholder="출장 내용을 간단히 적어주세요."
-                  class="w-full text-sm border border-slate-300 bg-white rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y"></textarea>
               </div>
             </div>
           </details>
@@ -1267,7 +1266,8 @@
                   <th class="border border-slate-300 px-3 py-3 w-44">차량명</th>
                   <th class="border border-slate-300 px-3 py-3 w-28 text-center">운전자</th>
                   <th class="border border-slate-300 px-3 py-3 w-48">동행자</th>
-                  <th class="border border-slate-300 px-3 py-3">행선지 및 운행용무 (메모)</th>
+                  <th class="border border-slate-300 px-3 py-3 w-52">행선지</th>
+                  <th class="border border-slate-300 px-3 py-3">내용</th>
                 </tr>
               </thead>
               <tbody id="reportTableBody" class="divide-y divide-slate-200 text-slate-800">
@@ -3384,6 +3384,9 @@
         peopleLabel += ` <span class="inline-block text-xs font-bold text-indigo-800 bg-white/90 px-1.5 py-0.5 rounded-md border border-indigo-200" title="동행자: ${companionNames}">+동행 ${companions.length}명(${companionNames})</span>`;
       }
 
+      const parts = getBookingParts(b);
+      const contentOneLine = parts.content.replace(/\s*\r?\n\s*/g, ' ');
+
       return `
         <div draggable="true"
           ondragstart="handleBookingDragStart(event, '${b.id}')"
@@ -3396,7 +3399,8 @@
           </div>
           <div class="my-1 leading-normal break-words">${peopleLabel}</div>
           <div class="text-xs font-bold opacity-90 truncate mt-1"><i class="fa-solid fa-car-rear mr-1"></i>${escapeHtml(b.vehicle)}</div>
-          <div class="text-xs font-medium opacity-85 truncate mt-0.5"><i class="fa-regular fa-comment-dots mr-1"></i>${escapeHtml(b.memo)}</div>
+          <div class="text-xs font-bold opacity-90 truncate mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(parts.destination)}</div>
+          ${contentOneLine ? `<div class="text-xs font-medium opacity-85 truncate mt-0.5"><i class="fa-regular fa-comment-dots mr-1"></i>${escapeHtml(contentOneLine)}</div>` : ''}
         </div>
       `;
     }
@@ -3500,8 +3504,7 @@
         document.querySelector(`input[name="meridiem"][value="${b.meridiem}"]`).checked = true;
         document.getElementById('startTime').value = b.startTime;
         document.getElementById('endTime').value = b.endTime;
-        document.getElementById('bookingMemo').value = b.memo;
-        fillTripLogFields(b);
+        fillBookingDetailFields(b);
         document.getElementById('extraCompanions').value = customCompanions.join(', ');
 
         renderCompanionCheckboxes(driverName, memberCompanions);
@@ -3520,8 +3523,7 @@
         document.getElementById('bookingDriver').value = defaultDriver;
         document.querySelector('input[name="meridiem"][value="AM"]').checked = true;
         updateDefaultTime('AM');
-        document.getElementById('bookingMemo').value = '';
-        fillTripLogFields(null);
+        fillBookingDetailFields(null);
         document.getElementById('extraCompanions').value = '';
 
         renderCompanionCheckboxes(defaultDriver, []);
@@ -3599,7 +3601,10 @@
       const meridiem = document.querySelector('input[name="meridiem"]:checked').value;
       const startTime = document.getElementById('startTime').value;
       const endTime = document.getElementById('endTime').value;
-      const memo = document.getElementById('bookingMemo').value.trim();
+      const destination = document.getElementById('bookingDestination').value.trim();
+      const content = document.getElementById('bookingContent').value.trim();
+      // memo: 달력·내역서·휴지통 등 기존 화면 호환용 요약 ("행선지 - 내용")
+      const memo = content ? `${destination} - ${content.replace(/\s*\r?\n\s*/g, ' ')}` : destination;
 
       const checkedCompanions = Array.from(document.querySelectorAll('input[name="companionItem"]:checked')).map(el => el.value);
       const extraRaw = document.getElementById('extraCompanions').value.trim();
@@ -3607,11 +3612,9 @@
       const companions = [...new Set([...checkedCompanions, ...extraCompanions])];
 
       const purpose = document.getElementById('bookingPurpose').value || '';
-      const destination = document.getElementById('bookingDestination').value.trim();
       const tripTitle = document.getElementById('bookingTripTitle').value.trim();
-      const tripContent = document.getElementById('bookingTripContent').value.trim();
 
-      const newBooking = { id, date, vehicle, driver, companions, meridiem, startTime, endTime, memo, purpose, destination, tripTitle, tripContent };
+      const newBooking = { id, date, vehicle, driver, companions, meridiem, startTime, endTime, memo, destination, content, purpose, tripTitle };
 
       const conflict = Object.values(state.bookings || {}).find(b => {
         if (b.id === id || b.date !== date || b.vehicle !== vehicle) return false;
@@ -3710,7 +3713,7 @@
       if (list.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="border border-slate-300 py-10 text-center text-slate-400 font-medium">
+            <td colspan="9" class="border border-slate-300 py-10 text-center text-slate-400 font-medium">
               해당 월에 등록된 차량 배차 내역이 없습니다.
             </td>
           </tr>
@@ -3718,6 +3721,7 @@
       } else {
         tbody.innerHTML = list.map((b, idx) => {
           const driverName = b.driver || b.member || '-';
+          const parts = getBookingParts(b);
           const companions = Array.isArray(b.companions) && b.companions.length > 0
             ? b.companions.join(', ')
             : '-';
@@ -3737,7 +3741,8 @@
               <td class="border border-slate-300 px-3 py-2 font-semibold">${escapeHtml(b.vehicle)}</td>
               <td class="border border-slate-300 px-3 py-2 text-center font-bold text-slate-900">${escapeHtml(driverName)}</td>
               <td class="border border-slate-300 px-3 py-2 text-slate-700">${escapeHtml(companions)}</td>
-              <td class="border border-slate-300 px-3 py-2">${escapeHtml(b.memo)}</td>
+              <td class="border border-slate-300 px-3 py-2 font-semibold">${escapeHtml(parts.destination) || '-'}</td>
+              <td class="border border-slate-300 px-3 py-2 whitespace-pre-line">${escapeHtml(parts.content) || '-'}</td>
             </tr>
           `;
         }).join('');
@@ -3769,9 +3774,10 @@
         return;
       }
 
-      const headers = ['연번', '운행일자', '오전/오후', '출발시간', '복귀시간', '사용차량', '운전자', '동행자', '동행인원(명)', '행선지 및 운행용무'];
+      const headers = ['연번', '운행일자', '오전/오후', '출발시간', '복귀시간', '사용차량', '운전자', '동행자', '동행인원(명)', '행선지', '내용'];
       const rows = list.map((b, idx) => {
         const driverName = b.driver || b.member || '';
+        const parts = getBookingParts(b);
         const companionsArr = Array.isArray(b.companions) ? b.companions : [];
         const companionsStr = companionsArr.join(', ');
         const meridiemStr = b.meridiem === 'AM' ? '오전' : '오후';
@@ -3786,7 +3792,8 @@
           driverName,
           companionsStr,
           companionsArr.length,
-          b.memo
+          parts.destination,
+          parts.content
         ].map(val => `"${String(val ?? '').replace(/"/g, '""')}"`).join(',');
       });
 
@@ -3828,22 +3835,31 @@
     const TRIP_TRAVELER_KEY = 'yc_trip_log_traveler';
     const TRIP_DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
 
-    // 배차 등록창의 출장일지 입력칸 채우기 (b가 null이면 초기화)
-    function fillTripLogFields(b) {
-      const purpose = b && TRIP_PURPOSES.includes(b.purpose) ? b.purpose : '';
-      const destination = (b && b.destination) || '';
-      const tripTitle = (b && b.tripTitle) || '';
-      const tripContent = (b && b.tripContent) || '';
-      document.getElementById('bookingPurpose').value = purpose;
-      document.getElementById('bookingDestination').value = destination;
-      document.getElementById('bookingTripTitle').value = tripTitle;
-      document.getElementById('bookingTripContent').value = tripContent;
-      document.getElementById('tripLogDetails').open = !!(purpose || destination || tripTitle || tripContent);
+    // 배차 1건을 행선지/내용/제목/목적으로 분리해서 반환 (옛 데이터는 memo를 행선지로 간주)
+    function getBookingParts(b) {
+      const memo = String(b.memo || '').trim();
+      return {
+        destination: String(b.destination || '').trim() || memo,
+        content: String(b.content ?? b.tripContent ?? '').trim(),
+        title: String(b.tripTitle || '').trim(),
+        purpose: TRIP_PURPOSES.includes(b.purpose) ? b.purpose : '',
+        legacy: !String(b.destination || '').trim()   // 행선지/내용 분리 전 데이터
+      };
+    }
+
+    // 배차 등록창의 행선지/내용/출장일지 추가정보 칸 채우기 (b가 null이면 초기화)
+    function fillBookingDetailFields(b) {
+      const parts = b ? getBookingParts(b) : { destination: '', content: '', title: '', purpose: '' };
+      document.getElementById('bookingDestination').value = parts.destination;
+      document.getElementById('bookingContent').value = parts.content;
+      document.getElementById('bookingPurpose').value = parts.purpose;
+      document.getElementById('bookingTripTitle').value = parts.title;
+      document.getElementById('tripLogDetails').open = !!(parts.purpose || parts.title);
     }
 
     // 출장목적을 지정하지 않은 경우 메모 키워드로 추정 (순서 중요: 직원교육 > 교육)
     function inferTripPurpose(text) {
-      const t = String(text || '');
+      const t = String(text || '').replace(/교육지원청|교육청|교육부|교육감/g, '');
       if (/직원\s*교육|직무\s*교육|보수\s*교육|연수/.test(t)) return '직원교육';
       if (/세미나|포럼|심포지엄|학술/.test(t)) return '세미나';
       if (/캠페인/.test(t)) return '캠페인';
@@ -3883,15 +3899,18 @@
         const names = [b.driver || b.member, ...(Array.isArray(b.companions) ? b.companions : [])].filter(Boolean);
         const others = [...new Set(names.filter(n => n !== me))];
 
-        const memo = (b.memo || '').trim();
-        const place = (b.destination || '').trim() || memo;
-        const title = (b.tripTitle || '').trim() || memo;
-        const content = (b.tripContent || '').trim();
+        const parts = getBookingParts(b);
+        const place = parts.destination;
+        const content = parts.content;
+        const title = parts.title || content.split(/\r?\n/)[0].trim() || place;
         const when = formatTripDateTime(b);
 
-        let purpose = TRIP_PURPOSES.includes(b.purpose) ? b.purpose : '';
+        let purpose = parts.purpose;
         if (!purpose) {
-          purpose = inferTripPurpose(`${title} ${memo}`);
+          // 제목/내용 키워드로 추정. 장소 이름만으로는 추정하지 않음(예: '○○회의실' → 회의 오판 방지).
+          // 단, 행선지/내용 분리 전 옛 데이터는 메모 한 줄뿐이라 그 문장으로 추정.
+          const basis = (parts.title || content) ? `${parts.title} ${content}` : (parts.legacy ? place : '');
+          purpose = inferTripPurpose(basis);
           inferredCount++;
         }
         if (!content) emptyContentCount++;
@@ -3983,7 +4002,7 @@
       }
 
       const notes = [];
-      if (result.inferredCount > 0) notes.push(`출장목적 미지정 ${result.inferredCount}건은 메모 내용으로 추정했어요`);
+      if (result.inferredCount > 0) notes.push(`출장목적 미지정 ${result.inferredCount}건은 내용 키워드로 추정했어요`);
       if (result.emptyContentCount > 0) notes.push(`'내용'이 비어 있는 ${result.emptyContentCount}건은 직접 채워 주세요`);
       info.innerHTML = `<span class="text-amber-700">${escapeHtml(query)}</span> · ${yy}년 ${Number(mm)}월 · 총 ${result.count}건` +
         (notes.length ? `<div class="text-xs font-medium text-slate-500 mt-0.5">※ ${notes.join(' / ')}</div>` : '');
@@ -4377,7 +4396,10 @@
           const comp = Array.isArray(b.companions) && b.companions.length > 0 ? ` (동행: ${b.companions.join(', ')})` : '';
           lines.push(`• [${amPm} ${b.startTime}~${b.endTime}] ${b.vehicle}`);
           lines.push(`  └ 운전자: ${driver}${comp}`);
-          lines.push(`  └ 행선지: ${b.memo || '-'}`);
+          const tgDest = b.destination || b.memo || '-';
+          const tgContent = String(b.content ?? b.tripContent ?? '').replace(/\s*\r?\n\s*/g, ' ').trim();
+          lines.push(`  └ 행선지: ${tgDest}`);
+          if (tgContent) lines.push(`  └ 내용: ${tgContent}`);
         });
       }
 
@@ -5025,7 +5047,10 @@ let rawBookings = (typeof state !== "undefined" && state && state.bookings) ? st
             const comp = (b.companions && b.companions.length) ? ` (동행: ${b.companions.join(", ")})` : "";
             lines.push(`• [${amPm} ${b.startTime}~${b.endTime}] ${b.vehicle}`);
             lines.push(`  └ 운전자: ${b.driver || b.member}${comp}`);
-            lines.push(`  └ 행선지: ${b.memo || "-"}`);
+            const tgDest = b.destination || b.memo || "-";
+            const tgContent = String(b.content ?? b.tripContent ?? "").replace(/\s*\r?\n\s*/g, " ").trim();
+            lines.push(`  └ 행선지: ${tgDest}`);
+            if (tgContent) lines.push(`  └ 내용: ${tgContent}`);
           });
         }
         lines.push(`━━━━━━━━━━━━━━━━━━━━`, `💡 오늘도 안전하고 활기찬 하루 되세요!`);
