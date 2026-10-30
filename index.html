@@ -209,7 +209,6 @@
         </div>
         <div>
           <span class="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">연천군정신건강복지센터</span>
-          <span class="hidden sm:inline-block text-xs text-slate-500 ml-2 font-medium">Since 1995 | 통합 업무 시스템</span>
         </div>
       </div>
 
@@ -1400,6 +1399,162 @@
     }
   </script>
 
+  <!-- 연가/차량배차 일정 충돌 안내: 기존 저장 기능은 그대로 유지 -->
+  <div id="crossScheduleAlertModal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-slate-950/65 p-3 sm:p-5 no-print" role="dialog" aria-modal="true" aria-labelledby="crossScheduleAlertTitle">
+    <div class="w-full max-w-xl max-h-[88vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-amber-200">
+      <div class="flex gap-3 items-start bg-amber-50 px-5 py-4 border-b border-amber-200">
+        <div class="shrink-0 rounded-xl bg-amber-100 text-amber-700 p-2.5"><i class="fa-solid fa-triangle-exclamation text-lg"></i></div>
+        <div>
+          <h2 id="crossScheduleAlertTitle" class="text-lg font-extrabold text-amber-900">연가·차량배차 일정 확인</h2>
+          <p id="crossScheduleAlertIntro" class="mt-1 text-sm text-amber-900"></p>
+        </div>
+      </div>
+      <div class="p-5 space-y-3">
+        <ul id="crossScheduleAlertMatches" class="space-y-2 max-h-60 overflow-y-auto text-sm text-slate-800"></ul>
+        <p id="crossScheduleAlertUnknown" class="hidden rounded-lg bg-slate-100 border border-slate-200 px-3 py-2 text-sm text-slate-700"></p>
+        <p class="text-xs text-slate-500">확인 후 진행을 선택하면 중복 상태에서도 저장할 수 있습니다. 예약 및 휴가의 실제 가능 여부를 확인해 주세요.</p>
+      </div>
+      <div class="flex flex-wrap justify-end gap-2 px-5 py-4 bg-slate-50 border-t border-slate-200">
+        <button id="crossScheduleAlertCancel" type="button" class="px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-100">취소 · 일정 수정</button>
+        <button id="crossScheduleAlertContinue" type="button" class="px-4 py-2.5 rounded-xl bg-amber-600 text-white text-sm font-extrabold hover:bg-amber-700">확인 후 진행</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // 두 개의 Firebase 프로젝트 사이에 화면 메모리만으로 일정 정보를 공유합니다.
+    // 원본 DB 구조/저장 위치는 변경하지 않습니다.
+    (function () {
+      'use strict';
+      const bridge = {
+        employees: [], leaveRecords: [], bookings: {}, leaveReady: false, carReady: false,
+        setLeaves(employees, records, ready) {
+          this.employees = Array.isArray(employees) ? employees : [];
+          this.leaveRecords = Array.isArray(records) ? records : [];
+          this.leaveReady = !!ready;
+        },
+        setBookings(bookings, ready) {
+          this.bookings = bookings && typeof bookings === 'object' ? bookings : {};
+          this.carReady = !!ready;
+        },
+        // 직원 ID는 서로 다른 Firebase 프로젝트에서 연결되지 않아 이름으로 매칭합니다.
+        normalizedName(value) { return String(value || '').replace(/\s+/g, '').trim(); },
+        toMinutes(value) {
+          if (!/^\d{1,2}:\d{2}$/.test(String(value || ''))) return null;
+          const [hours, mins] = value.split(':').map(Number);
+          return hours < 24 && mins < 60 ? (hours * 60 + mins) : null;
+        },
+        dateBounds(value) {
+          const parts = String(value || '').split('~').map(p => p.trim());
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(parts[0] || '')) return null;
+          const end = parts[1] || parts[0];
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(end) || end < parts[0]) return null;
+          return { start: parts[0], end };
+        },
+        timeBounds(range) {
+          const parts = String(range || '').split('~').map(p => p.trim());
+          if (parts.length !== 2) return null; // 시간 미지정은 해당 일 전체로 처리
+          const start = this.toMinutes(parts[0]);
+          const end = this.toMinutes(parts[1]);
+          return start !== null && end !== null && end > start ? {start, end} : null;
+        },
+        isAbsence(type) {
+          // 적립/발생은 직원이 쉬는 시간이 아니므로 비교 대상에서 제외
+          return type !== '대체휴무 발생';
+        },
+        overlaps(leave, booking) {
+          const dates = this.dateBounds(leave.dateStr || leave.date);
+          if (!dates || !booking.date || booking.date < dates.start || booking.date > dates.end) return false;
+          const leaveTime = this.timeBounds(leave.timeRange);
+          const bookingStart = this.toMinutes(booking.startTime);
+          const bookingEnd = this.toMinutes(booking.endTime);
+          // 시간 정보가 비어 있거나 유효하지 않으면 같은 날짜의 전일 충돌로 간주
+          if (!leaveTime || bookingStart === null || bookingEnd === null || bookingEnd <= bookingStart) return true;
+          return leaveTime.start < bookingEnd && leaveTime.end > bookingStart;
+        },
+        checkBooking(booking) {
+          const people = [...new Set([booking.driver || booking.member, ...(Array.isArray(booking.companions) ? booking.companions : [])]
+            .map(name => this.normalizedName(name)).filter(Boolean))];
+          const employeeById = new Map(this.employees.map(emp => [emp.id, emp.name]));
+          const matches = [];
+          this.leaveRecords.forEach(record => {
+            if (!this.isAbsence(record.leaveType)) return;
+            const name = employeeById.get(record.empId);
+            if (!people.includes(this.normalizedName(name))) return;
+            if (!this.overlaps(record, booking)) return;
+            const role = this.normalizedName(name) === this.normalizedName(booking.driver || booking.member) ? '운전자' : '동행자';
+            matches.push(`${name} (${role}) · ${record.leaveType || '연가'} · ${record.dateStr || record.date}${record.timeRange ? ' ' + record.timeRange : ' (전일/시간 미지정)'}`);
+          });
+          return { matches, unavailable: !this.leaveReady ? '연가 자료가 아직 동기화되지 않았습니다. 현재 차량배차와의 중복 여부를 완전히 확인할 수 없습니다.' : '' };
+        },
+        checkLeave(leave) {
+          if (!this.isAbsence(leave.leaveType)) return { matches: [], unavailable: '' };
+          const nameKey = this.normalizedName(leave.employeeName);
+          const matches = [];
+          Object.values(this.bookings).forEach(booking => {
+            const driverKey = this.normalizedName(booking.driver || booking.member);
+            const companionKeys = (Array.isArray(booking.companions) ? booking.companions : []).map(n => this.normalizedName(n));
+            if (nameKey !== driverKey && !companionKeys.includes(nameKey)) return;
+            if (!this.overlaps(leave, booking)) return;
+            const role = nameKey === driverKey ? '운전자' : '동행자';
+            matches.push(`${leave.employeeName} (${role}) · ${booking.date} ${booking.startTime || '시간 미지정'}~${booking.endTime || '시간 미지정'} · ${booking.vehicle || '차량 미지정'}`);
+          });
+          return { matches, unavailable: !this.carReady ? '차량배차 자료가 아직 동기화되지 않았습니다. 현재 연가와의 중복 여부를 완전히 확인할 수 없습니다.' : '' };
+        },
+        confirmIfNeeded(result, actionLabel) {
+          if (!result.matches.length && !result.unavailable) return Promise.resolve(true);
+          const modal = document.getElementById('crossScheduleAlertModal');
+          const intro = document.getElementById('crossScheduleAlertIntro');
+          const list = document.getElementById('crossScheduleAlertMatches');
+          const unknown = document.getElementById('crossScheduleAlertUnknown');
+          const cancel = document.getElementById('crossScheduleAlertCancel');
+          const proceed = document.getElementById('crossScheduleAlertContinue');
+          intro.textContent = result.matches.length
+            ? `${actionLabel}하려는 일정과 겹치는 기록이 ${result.matches.length}건 발견되었습니다.`
+            : '다른 일정의 동기화가 완료되지 않아 중복 여부를 확인할 수 없습니다.';
+          list.replaceChildren();
+          result.matches.slice(0, 30).forEach(detail => {
+            const item = document.createElement('li');
+            item.className = 'rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 break-words';
+            item.textContent = '⚠ ' + detail;
+            list.appendChild(item);
+          });
+          if (result.matches.length > 30) {
+            const item = document.createElement('li');
+            item.textContent = `외 ${result.matches.length - 30}건이 더 있습니다.`;
+            list.appendChild(item);
+          }
+          unknown.textContent = result.unavailable || '';
+          unknown.classList.toggle('hidden', !result.unavailable);
+          proceed.textContent = `확인 후 ${actionLabel}`;
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          return new Promise(resolve => {
+            const previousFocus = document.activeElement;
+            const finish = answer => {
+              modal.classList.add('hidden');
+              modal.classList.remove('flex');
+              cancel.removeEventListener('click', onCancel);
+              proceed.removeEventListener('click', onProceed);
+              document.removeEventListener('keydown', onKeydown);
+              if (previousFocus && previousFocus.focus) previousFocus.focus();
+              resolve(answer);
+            };
+            const onCancel = () => finish(false);
+            const onProceed = () => finish(true);
+            const onKeydown = event => { if (event.key === 'Escape') { event.preventDefault(); finish(false); } };
+            cancel.addEventListener('click', onCancel);
+            proceed.addEventListener('click', onProceed);
+            document.addEventListener('keydown', onKeydown);
+            cancel.focus();
+          });
+        },
+        confirmBooking(booking, action = '등록') { return this.confirmIfNeeded(this.checkBooking(booking), action); },
+        confirmLeave(leave, action = '등록') { return this.confirmIfNeeded(this.checkLeave(leave), action); }
+      };
+      window.crossScheduleAlerts = bridge;
+    })();
+  </script>
+
   <!-- =================================================================
        [스크립트 1] 연가 관리 시스템 (Firestore: yeoncheon-leave)
        ================================================================= -->
@@ -1427,6 +1582,11 @@
     let editingCompRecordId = null;   // 대체휴무 적립 탭 수정 ID
     let calendar;
     let pendingConfirmCallback = null;
+    let leaveEmployeesReady = false;
+    let leaveRecordsReady = false;
+    function syncLeaveConflictBridge() {
+      window.crossScheduleAlerts.setLeaves(employeesData, recordsData, leaveEmployeesReady && leaveRecordsReady);
+    }
 
     // 기존 '초과근무' 또는 '대체휴무' 데이터를 '대체휴무 사용'으로 호환 매핑
     function normalizeLeaveType(type) {
@@ -1740,6 +1900,14 @@
           }
 
           const now = new Date().getTime();
+          const employee = employeesData.find(e => e.id === record.empId);
+          if (employee && !(await window.crossScheduleAlerts.confirmLeave({
+            employeeName: employee.name, leaveType: normalizeLeaveType(record.leaveType),
+            dateStr: newDateStr, timeRange: record.timeRange || ''
+          }, '이동'))) {
+            info.revert();
+            return;
+          }
           try {
             await updateDoc(doc(db, "leave_records", recordId), {
               dateStr: newDateStr
@@ -1769,6 +1937,14 @@
           }
 
           const now = new Date().getTime();
+          const employee = employeesData.find(e => e.id === record.empId);
+          if (employee && !(await window.crossScheduleAlerts.confirmLeave({
+            employeeName: employee.name, leaveType: normalizeLeaveType(record.leaveType),
+            dateStr: newDateStr, timeRange: record.timeRange || ''
+          }, '변경'))) {
+            info.revert();
+            return;
+          }
           try {
             await updateDoc(doc(db, "leave_records", recordId), {
               dateStr: newDateStr
@@ -1947,6 +2123,8 @@
     onSnapshot(query(collection(db, "employees"), orderBy("createdAt", "desc")), (snapshot) => {
       employeesData = [];
       snapshot.forEach((docSnap) => employeesData.push({ id: docSnap.id, ...docSnap.data() }));
+      leaveEmployeesReady = true;
+      syncLeaveConflictBridge();
       renderEmployees();
       updateCalendar();
       if (currentEmpId) updateModalEmployeeSummary();
@@ -1956,6 +2134,8 @@
     onSnapshot(collection(db, "leave_records"), (snapshot) => {
       recordsData = [];
       snapshot.forEach((docSnap) => recordsData.push({ id: docSnap.id, ...docSnap.data() }));
+      leaveRecordsReady = true;
+      syncLeaveConflictBridge();
       renderEmployees();
       updateCalendar();
       if (currentEmpId) {
@@ -2462,6 +2642,10 @@
 
       const timeRange = (startT && endT) ? `${startT}~${endT}` : "";
       const now = new Date().getTime();
+      const currentEmployee = employeesData.find(emp => emp.id === currentEmpId);
+      if (currentEmployee && !(await window.crossScheduleAlerts.confirmLeave({
+        employeeName: currentEmployee.name, leaveType, dateStr, timeRange
+      }, editingRecordId ? '수정' : '등록'))) return;
 
       try {
         if (editingRecordId) {
@@ -2962,8 +3146,10 @@
             state.bookings = data.bookings || {};
             state.sharedMemo = data.sharedMemo ?? "";
             localStorage.setItem('jeungCarDispatchBackup', JSON.stringify(state));
+            window.crossScheduleAlerts.setBookings(state.bookings, true);
             renderAll(false);
           } else {
+            window.crossScheduleAlerts.setBookings(state.bookings, true);
             rtdbRef.set(state);
           }
         }, (err) => {
@@ -2995,8 +3181,10 @@
             state.bookings = data.bookings ? JSON.parse(data.bookings) : {};
             state.sharedMemo = data.sharedMemo ?? "";
             localStorage.setItem('jeungCarDispatchBackup', JSON.stringify(state));
+            window.crossScheduleAlerts.setBookings(state.bookings, true);
             renderAll(false);
           } else {
+            window.crossScheduleAlerts.setBookings(state.bookings, true);
             saveToDataSource();
           }
         }, (err) => {
@@ -3009,6 +3197,7 @@
 
     function saveToDataSource() {
       localStorage.setItem('jeungCarDispatchBackup', JSON.stringify(state));
+      window.crossScheduleAlerts.setBookings(state.bookings, activeSyncMode !== 'LOCAL');
       renderAll();
 
       if (rtdbRef) {
@@ -3044,6 +3233,7 @@
         localStorage.setItem('jeung_car_rtdb_url', dbUrl);
         FIREBASE_CONFIG.databaseURL = dbUrl;
 
+        window.crossScheduleAlerts.setBookings({}, false);
         const customApp = firebase.initializeApp(FIREBASE_CONFIG, 'jeungCarApp_' + Date.now());
         const customDb = customApp.database();
         rtdbRef = customDb.ref('carDispatchApp');
@@ -3055,8 +3245,10 @@
             state.vehicles = data.vehicles || [];
             state.bookings = data.bookings || {};
             state.sharedMemo = data.sharedMemo ?? "";
+            window.crossScheduleAlerts.setBookings(state.bookings, true);
             renderAll(false);
           } else {
+            window.crossScheduleAlerts.setBookings(state.bookings, true);
             rtdbRef.set(state);
           }
         });
@@ -3428,7 +3620,7 @@
       e.currentTarget.classList.remove('drag-over');
     }
 
-    function handleBookingDrop(e, targetDateStr) {
+    async function handleBookingDrop(e, targetDateStr) {
       e.preventDefault();
       e.currentTarget.classList.remove('drag-over');
 
@@ -3439,6 +3631,7 @@
       const booking = state.bookings[bookingId];
 
       if (booking.date === targetDateStr) return;
+      if (!(await window.crossScheduleAlerts.confirmBooking({ ...booking, date: targetDateStr }, '이동'))) return;
 
       // 이동할 날짜에 동시간대 동일 차량 중복 배차가 있는지 확인
       const conflict = Object.values(state.bookings || {}).find(b => {
@@ -3630,13 +3823,19 @@
         return;
       }
 
-      commitBookingSave(newBooking);
+      requestBookingSave(newBooking);
+    }
+
+    async function requestBookingSave(booking) {
+      if (!(await window.crossScheduleAlerts.confirmBooking(booking, '등록'))) return;
+      commitBookingSave(booking);
     }
 
     function forceSaveBooking() {
       if (pendingBookingData) {
-        commitBookingSave(pendingBookingData);
-        pendingBookingData = null;
+        const booking = pendingBookingData;
+        hideConflictBanner();
+        requestBookingSave(booking);
       }
     }
 
@@ -4088,6 +4287,7 @@
 
     setFontScale('normal');
     renderAll();
+    window.crossScheduleAlerts.setBookings({}, false);
     initDataSync();
   </script>
 <!-- =================================================================
