@@ -169,11 +169,11 @@
       }
 
       /* 차량 배차 내역서 인쇄 모드 (기본 호환 포함) */
-      body:not(.printing-leave) #printArea,
-      body:not(.printing-leave) #printArea * {
+      body:not(.printing-leave):not(.printing-vacation) #printArea,
+      body:not(.printing-leave):not(.printing-vacation) #printArea * {
         visibility: visible;
       }
-      body:not(.printing-leave) #printArea {
+      body:not(.printing-leave):not(.printing-vacation) #printArea {
         position: absolute;
         left: 0;
         top: 0;
@@ -188,6 +188,227 @@
       tr { page-break-inside: avoid; page-break-after: auto; }
       thead { display: table-header-group; }
     }
+  
+
+    /* ============================================================
+       통합 화면 디자인 시스템 · 차량배차 / 연가 공통
+       ※ 기록 데이터, 저장 방식, 배차 계산과 무관한 표현 전용 스타일
+       ============================================================ */
+    :root {
+      --workspace-primary: #4f46e5;
+      --workspace-primary-hover: #4338ca;
+      --workspace-border: #e2e8f0;
+      --workspace-ink: #0f172a;
+      --workspace-muted: #64748b;
+    }
+    body { background-color: #f1f5f9; }
+    #section-leave, #section-car { color: var(--workspace-ink); }
+    .workspace-header {
+      border: 1px solid var(--workspace-border);
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(15,23,42,.035);
+    }
+    .workspace-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 1rem;
+      color: white;
+      background: linear-gradient(135deg,#4f46e5,#2563eb);
+      box-shadow: 0 8px 20px rgba(79,70,229,.17);
+      font-size: 1.4rem;
+    }
+    .workspace-card {
+      background: #fff;
+      border: 1px solid var(--workspace-border);
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(15,23,42,.035);
+    }
+    .workspace-card-heading { color: #0f172a; font-weight: 800; letter-spacing: -.015em; }
+    .workspace-help { color: #64748b; line-height: 1.55; }
+    .workspace-primary-btn {
+      background: var(--workspace-primary);
+      color: #fff;
+      border-radius: .75rem;
+      font-weight: 700;
+      transition: background-color .15s ease, transform .15s ease;
+    }
+    .workspace-primary-btn:hover { background: var(--workspace-primary-hover); }
+    #section-leave :is(input,select,textarea),
+    #section-car :is(input,select,textarea) { accent-color: var(--workspace-primary); }
+    #section-leave :is(input,select,textarea):focus-visible,
+    #section-car :is(input,select,textarea):focus-visible {
+      outline: 2px solid rgba(79,70,229,.25);
+      outline-offset: 1px;
+    }
+    #section-leave .workspace-form-control {
+      border-radius: .75rem;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+    }
+    #section-leave .workspace-table thead { background: #f8fafc; }
+    #section-leave .workspace-table thead th { font-weight: 750; color: #475569; }
+    #section-leave .workspace-table tbody tr { border-bottom: 1px solid #e2e8f0; }
+    #section-leave .workspace-table tbody tr:hover { background-color: #f8fafc; }
+    #section-leave .fc { font-family: inherit; color: #334155; }
+    #section-leave .fc .fc-toolbar { gap: .75rem; }
+    #section-leave .fc .fc-button-primary {
+      background: #fff !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: .65rem !important;
+      color: #334155 !important;
+      box-shadow: none !important;
+      font-size: .85rem !important;
+      padding: .55rem .8rem !important;
+    }
+    #section-leave .fc .fc-button-primary:hover,
+    #section-leave .fc .fc-button-primary:not(:disabled).fc-button-active {
+      color: #fff !important;
+      background: #4f46e5 !important;
+      border-color: #4f46e5 !important;
+    }
+    #section-leave .fc .fc-toolbar-title {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+      font-size: 1.4rem !important;
+      letter-spacing: -.025em;
+    }
+    #section-leave .fc .fc-col-header-cell {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      padding: .65rem 0;
+      font-size: .85rem;
+      font-weight: 800;
+    }
+    #section-leave .fc .fc-col-header-cell a { color: #475569; }
+    #section-leave .fc .fc-col-header-cell:first-child a { color: #ef4444; }
+    #section-leave .fc .fc-col-header-cell:last-child a { color: #2563eb; }
+    #section-leave .fc .fc-daygrid-day-frame { min-height: 132px; }
+    #section-leave .fc .fc-daygrid-day-number { font-weight: 750; padding: .5rem; }
+    #section-leave .fc .fc-day-today { background-color: #eef2ff !important; }
+    #section-leave .fc .fc-scrollgrid,
+    #section-leave .fc .fc-scrollgrid td,
+    #section-leave .fc .fc-scrollgrid th { border-color: #e2e8f0; }
+    #section-leave .fc-event { border-radius: .45rem; padding: 3px 6px; }
+    #section-leave .fc-list-table th { background: #f1f5f9; }
+    /* FullCalendar는 640px 이하에서 기존 목록형 보기와 줄바꿈을 유지 */
+    @media (max-width: 640px) {
+      .workspace-icon { width: 3rem; height: 3rem; font-size: 1.1rem; }
+      #section-leave .fc .fc-daygrid-day-frame { min-height: 76px; }
+      #section-leave .fc .fc-toolbar-title { font-size: 1.08rem !important; }
+      #section-leave .fc .fc-button-primary { font-size: .75rem !important; padding: .4rem .5rem !important; }
+    }
+
+  
+    /* 회사 원본 HWP의 미리보기(724×1024)에서 확인한 서식 비율에 맞춘 A4 휴가원.
+       원본: 상단 제목 / 3칸 결재란 / 소속·직급·성명+안내 문장 포함 단일 표. */
+    .vacation-print-only { display: none; }
+    .vacation-paper {
+      position: relative; box-sizing: border-box; flex: 0 0 auto;
+      width: 210mm; height: 297mm; margin: 0;
+      padding: 0; background: #fff; color: #000;
+      font-family: '굴림', 'Gulim', 'Malgun Gothic', 'Noto Sans CJK KR', 'NanumGothic', sans-serif;
+      font-size: 13pt; font-weight: 400; line-height: 1.35;
+      box-shadow: 0 9px 30px rgba(15,23,42,.15);
+    }
+    .vacation-document-title {
+      position: absolute; top: 29.3mm; left: 0; width: 100%;
+      text-align: center; font-size: 29pt; line-height: 1.2; font-weight: 700;
+      letter-spacing: .29em; padding-left: .29em; box-sizing: border-box;
+    }
+    .vacation-approvals {
+      position: absolute; left: 114.3mm; top: 53.7mm;
+      width: 66.5mm; height: 27.35mm; table-layout: fixed;
+      border-collapse: collapse; border: .28mm solid #000;
+      font-family: '굴림', 'Gulim', 'NanumGothic', sans-serif;
+      font-size: 12pt; line-height: 1.25;
+    }
+    .vacation-approvals th, .vacation-approvals td {
+      border: .18mm solid #000; text-align: center; padding: 0;
+      background: #fff; font-weight: 400;
+    }
+    .vacation-approvals th { height: 9.5mm; font-weight: 700; }
+    .vacation-approvals td { height: 17.8mm; }
+    .vacation-original-table {
+      position: absolute; top: 91.7mm; left: 27.85mm; width: 155mm;
+      border: .28mm solid #000; border-collapse: collapse;
+      table-layout: fixed; font-size: 13pt; line-height: 1.45;
+    }
+    .vacation-original-table td {
+      border: .18mm solid #000; box-sizing: border-box; padding: 0;
+      vertical-align: middle; background: white; overflow-wrap: anywhere;
+    }
+    .vacation-original-table .vacation-original-header { height: 44.5mm; position: relative; }
+    .vacation-person-info {
+      position: absolute; left: 62.5mm; top: 3.8mm;
+      display: grid; grid-template-columns: 22mm minmax(0,1fr);
+      row-gap: .7mm; width: 85mm; align-items: baseline;
+      font-size: 12.7pt; line-height: 1.55;
+    }
+    /* 세 항목의 콜론을 동일한 오른쪽 끝에 놓아 정확히 세로 정렬 */
+    .vacation-person-info .person-key {
+      display: flex; align-items: baseline; justify-content: space-between;
+      min-width: 0; white-space: nowrap; letter-spacing: .04em;
+    }
+    .vacation-person-info .person-caption { white-space: nowrap; }
+    .vacation-person-info .person-colon { flex: 0 0 2.5mm; text-align: right; }
+    .vacation-person-info .person-val { min-height: 5mm; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .vacation-document-phrase {
+      position: absolute; bottom: 4.4mm; left: 2.8mm; right: 1.5mm;
+      margin: 0; font-size: 13pt; letter-spacing: -.04em; line-height: 1.5;
+      white-space: nowrap; overflow-wrap: normal;
+    }
+    .vacation-original-table .vacation-original-period { height: 32.55mm; }
+    .vacation-original-table .vacation-original-reason { height: 23.8mm; }
+    .vacation-original-table .vacation-original-other { height: 21.65mm; }
+    .vacation-original-table .vacation-original-footer { height: 52mm; position: relative; }
+    .vacation-label-col { width: 35.8mm; text-align: center; white-space: nowrap; }
+    .vacation-label-col .widely-spaced { letter-spacing: .12em; }
+    .vacation-period-content { text-align: center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap: 1.3mm; padding: 1mm 2mm; }
+    .vacation-period-content .vacation-period-date { white-space: pre-line; letter-spacing:.03em; }
+    .vacation-reason-content, .vacation-other-content {
+      white-space: pre-wrap; padding: 2.3mm 3mm;
+      max-height: 100%; overflow-wrap: anywhere;
+      text-align: center;
+    }
+    .vacation-footer-date, .vacation-footer-applicant, .vacation-footer-org {
+      position: absolute; width:100%; left:0; text-align:center;
+    }
+    .vacation-footer-date { top: 5.7mm; }
+    .vacation-footer-applicant { top: 22.2mm; }
+    .vacation-footer-org { top: 38.1mm; font-size: 16.5pt; letter-spacing: .09em; }
+    #vacationPreviewHolder { overflow:auto; align-items:flex-start; }
+    #vacationPreviewHolder .vacation-paper { zoom: .72; }
+    .vacation-form-label { display:block; font-size: 12px; font-weight:750; color:#475569; margin-bottom:5px; }
+    .vacation-form-input { width:100%; border:1px solid #cbd5e1; border-radius:9px; background:#fff; padding:8px 10px; font-size:13px; outline:none; }
+    .vacation-form-input:focus { border-color:#6366f1; box-shadow:0 0 0 3px #e0e7ff; }
+    @media (max-width:640px) {
+      #vacationPreviewHolder { justify-content:flex-start; }
+      #vacationPreviewHolder .vacation-paper { zoom: .58; }
+    }
+    @media print {
+      @page { size: A4 portrait; margin: 0; }
+      body.printing-vacation { background:#fff !important; margin:0 !important; padding:0 !important; }
+      body.printing-vacation > :not(#vacationPrintArea) { display:none !important; }
+      body.printing-vacation #vacationPrintArea,
+      body.printing-vacation #vacationPrintArea * { visibility:visible !important; }
+      body.printing-vacation #vacationPrintArea {
+        display:block !important; position:static !important;
+        width:210mm !important; height:297mm !important;
+        margin:0 !important; padding:0 !important;
+      }
+      body.printing-vacation #vacationPrintArea .vacation-paper {
+        display:block; width:210mm; height:297mm;
+        margin:0; padding:0; box-shadow:none; border:0;
+        zoom:1; page-break-inside: avoid; break-inside:avoid;
+      }
+      body.printing-vacation #vacationPrintArea .vacation-approvals th { background:white !important; }
+    }
+
   </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen">
@@ -251,83 +472,82 @@
   <!-- =================================================================
        [탭 1] 연가 및 근무 관리 섹션 (yeoncheon-leave 연결)
        ================================================================= -->
-  <section id="section-leave" class="p-4 md:p-6 no-print">
-    <div class="max-w-7xl mx-auto">
-      <!-- 헤더 영역 -->
-      <div class="mb-6 flex flex-col lg:flex-row lg:justify-between lg:items-end gap-3">
-        <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-800">연천군정신건강복지센터 연가 및 대체휴무 관리</h1>
-        </div>
-        <div class="flex flex-wrap items-center gap-2.5">
-          <button onclick="openLeaveReportModal()" class="inline-flex items-center gap-2 text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm transition cursor-pointer">
-            <i class="fa-solid fa-print"></i> 월별 연가 내역 출력 / 엑셀
-          </button>
-          <div class="flex flex-wrap gap-2 text-xs text-gray-600 bg-white px-3.5 py-2.5 rounded-xl border border-gray-200 shadow-xs">
-            <span class="font-bold text-gray-700">구분 안내:</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>연가(연가차감)</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>대체휴무 발생(+적립)</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>대체휴무 사용(-차감)</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>공가</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-600 inline-block"></span>교육공가</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>검진공가</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>비공식 연가</span>
+  <section id="section-leave" class="p-3 sm:p-6 no-print">
+    <div class="max-w-[1600px] mx-auto">
+      <!-- 두 업무 화면에서 공통으로 사용하는 페이지 헤더 -->
+      <header class="workspace-header p-5 sm:p-6 mb-6 flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center gap-4 min-w-0">
+          <div class="workspace-icon"><i class="fa-regular fa-calendar-check"></i></div>
+          <div class="min-w-0">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">연가 및 근무 관리</h1>
+            <p class="text-sm sm:text-base text-slate-600 mt-0.5 font-medium">직원별 연가·대체휴무 기록 및 전체 근무 일정 관리</p>
           </div>
         </div>
-      </div>
-
-      <!-- 연가 공지 및 공유 메모장 영역 -->
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="text-lg font-bold text-gray-700 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-              <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
-            </svg>
-            연가 공유 메모장 (공지사항)
-          </h2>
-          <button onclick="saveMemo()" class="text-sm bg-yellow-100 text-yellow-800 px-3.5 py-1.5 rounded-lg hover:bg-yellow-200 font-bold transition cursor-pointer">
-            메모 저장하기
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200">
+            <i class="fa-solid fa-calendar-days text-indigo-600"></i> 휴가·공가 통합 관리
+          </span>
+          <button onclick="openLeaveReportModal()" class="workspace-primary-btn inline-flex items-center gap-2 text-sm px-4 py-2.5 shadow-sm cursor-pointer">
+            <i class="fa-solid fa-print"></i> 월별 연가 내역 출력 / 엑셀
           </button>
         </div>
-        <textarea id="leaveSharedMemo" class="w-full border border-gray-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-400 min-h-[80px] resize-y text-sm text-gray-700" placeholder="직원들과 공유할 연가 관련 메모나 공지사항을 입력하세요. 저장하면 다른 PC에서도 즉시 보입니다."></textarea>
-      </div>
+      </header>
 
-      <!-- 메인 그리드: 신규 직원 등록 & 직원별 연가/대체휴무 현황 -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-        <!-- 직원 등록 폼 (3칸) -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit lg:col-span-3">
-          <h2 class="text-xl font-bold mb-4 text-gray-700">신규 직원 등록</h2>
+      <!-- 차량 배차 화면과 동일한 3:9 카드 대시보드 구성 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-10">
+        <!-- 왼쪽: 관리 도구 · 공유 메모 -->
+        <aside class="lg:col-span-3 space-y-6 min-w-0">
+          <!-- 신규 직원 등록 -->
+<div class="workspace-card p-5 sm:p-6 h-fit">
+          <h2 class="workspace-card-heading text-base sm:text-lg mb-2 flex items-center gap-2"><i class="fa-solid fa-user-plus text-indigo-600"></i> 신규 직원 등록</h2>
+          <p class="workspace-help text-sm mb-4">직원을 등록하면 연가 현황과 일정에 함께 표시됩니다.</p>
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">이름</label>
-              <input type="text" id="empName" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-400 text-sm" placeholder="홍길동">
+              <input type="text" id="empName" class="workspace-form-control w-full p-2.5 outline-none focus:ring-2 focus:ring-indigo-400 text-sm" placeholder="홍길동">
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">총 연가 (일)</label>
-                <input type="number" id="empTotalDays" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-400 text-sm" min="0" value="15">
+                <input type="number" id="empTotalDays" class="workspace-form-control w-full p-2.5 outline-none focus:ring-2 focus:ring-indigo-400 text-sm" min="0" value="15">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">추가 (시간)</label>
-                <input type="number" id="empTotalHours" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-400 text-sm" min="0" max="7" value="0">
+                <input type="number" id="empTotalHours" class="workspace-form-control w-full p-2.5 outline-none focus:ring-2 focus:ring-indigo-400 text-sm" min="0" max="7" value="0">
               </div>
             </div>
-            <button onclick="addEmployee()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 transition text-sm cursor-pointer">
+            <button onclick="addEmployee()" class="workspace-primary-btn w-full py-2.5 transition text-sm cursor-pointer">
               등록하기
             </button>
           </div>
         </div>
 
-        <!-- 연가 현황 테이블 (9칸) -->
-        <div class="lg:col-span-9 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <!-- 연가 공유 메모장 -->
+<div class="workspace-card p-5 sm:p-6">
+        <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+          <h2 class="workspace-card-heading text-base sm:text-lg flex items-center gap-2">
+            <i class="fa-solid fa-note-sticky text-amber-500"></i> 연가 공유 메모장 (공지사항)
+          </h2>
+          <button onclick="saveMemo()" class="text-sm bg-amber-100 text-amber-900 border border-amber-200 px-3.5 py-2 rounded-xl hover:bg-amber-200 font-bold transition cursor-pointer">
+            메모 저장하기
+          </button>
+        </div>
+        <textarea id="leaveSharedMemo" class="w-full bg-amber-50/70 border border-amber-200 rounded-xl p-4 outline-none focus:ring-2 focus:ring-amber-400 min-h-[95px] resize-y text-sm text-slate-800 leading-relaxed" placeholder="직원들과 공유할 연가 관련 메모나 공지사항을 입력하세요. 저장하면 다른 PC에서도 즉시 보입니다."></textarea>
+      </div>
+        </aside>
+
+        <!-- 오른쪽: 전체 현황 · 연가 캘린더 -->
+        <div class="lg:col-span-9 space-y-6 min-w-0">
+          <!-- 직원별 연가 현황 -->
+<div class="workspace-card p-5 sm:p-6">
           <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-            <h2 class="text-xl font-bold text-gray-700">직원별 연가 및 대체휴무 현황</h2>
-            <span class="text-xs text-gray-500">* 직원 이름을 클릭하면 상세 창이 열리며, 상단 <b>[대체휴무 누적 현황]</b> 박스를 누르면 대체휴무 적립을 별도로 기록할 수 있습니다.</span>
+            <h2 class="workspace-card-heading text-base sm:text-lg flex items-center gap-2"><i class="fa-solid fa-users text-indigo-600"></i> 직원별 연가 및 대체휴무 현황</h2>
+            <span class="workspace-help text-xs">이름을 클릭해 상세 기록 확인 · 대체휴무 현황에서 적립 기록</span>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="workspace-table w-full text-left border-collapse">
               <thead>
-                <tr class="bg-gray-50 border-b border-gray-200">
+                <tr class="bg-slate-50 border-b border-slate-200">
                   <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">이름</th>
                   <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">총 연가</th>
                   <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">사용 연가(차감)</th>
@@ -343,22 +563,21 @@
             </table>
           </div>
         </div>
-      </div>
 
-      <!-- 연가 캘린더 영역 -->
-      <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 mb-10">
+          <!-- 전체 연가 캘린더 -->
+<div class="workspace-card p-4 sm:p-6 overflow-hidden">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
           <div>
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-xl font-bold text-gray-700">전체 연가 및 근무 일정표</h2>
+              <h2 class="workspace-card-heading text-lg sm:text-xl flex items-center gap-2"><i class="fa-solid fa-calendar-days text-indigo-600"></i> 전체 연가 및 근무 일정표</h2>
               <!-- 모바일/좁은 화면용 빠른 보기 전환 버튼 -->
               <div class="inline-flex sm:hidden bg-gray-100 p-0.5 rounded-lg border border-gray-200 text-xs">
                 <button type="button" onclick="changeLeaveCalendarView('dayGridMonth')" class="px-2.5 py-1 rounded-md font-bold text-gray-700 hover:bg-white">달력형</button>
                 <button type="button" onclick="changeLeaveCalendarView('listMonth')" class="px-2.5 py-1 rounded-md font-bold text-indigo-700 bg-white shadow-2xs">목록형(추천)</button>
               </div>
             </div>
-            <p class="text-xs text-indigo-600 font-medium mt-1">* 날짜 칸을 클릭(또는 드래그)하면 바로 일정을 입력할 수 있습니다. 모바일에서는 우측 상단 <b>[목록]</b> 보기를 누르면 글씨 잘림 없이 한눈에 보입니다.</p>
-            <p class="text-xs text-emerald-700 font-semibold mt-0.5">* 달력의 일정을 마우스로 드래그하여 다른 날짜로 바로 이동할 수 있습니다. (우측 끝을 끌어 기간 조절 가능)</p>
+            <p class="workspace-help text-xs font-medium mt-2">날짜를 누르거나 드래그해 일정을 등록할 수 있습니다. 모바일에서는 목록형으로도 확인하세요.</p>
+            <p class="text-xs text-indigo-700 font-semibold mt-0.5"><i class="fa-solid fa-hand-pointer mr-1"></i>일정을 드래그해 날짜 이동 · 우측 끝을 끌어 기간 조절</p>
           </div>
           <!-- 색상 범례 (Legend) -->
           <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-medium">
@@ -385,25 +604,27 @@
             </span>
           </div>
         </div>
-        <div id="calendar" class="min-h-[520px]"></div>
+        <div id="calendar" class="min-h-[520px] pt-4 border-t border-slate-200"></div>
+      </div>
+        </div>
       </div>
     </div>
 
-    <!-- ===============================================================
+        <!-- ===============================================================
          개별 직원 상세 모달창 (휴가 사용 탭 / 대체휴무 적립 탭 분리)
          =============================================================== -->
-    <div id="leaveModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-3 sm:p-4">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+    <div id="leaveModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center z-50 p-3 sm:p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden border border-slate-200">
         <!-- 모달 헤더 -->
-        <div class="p-4 sm:p-5 border-b bg-slate-50/70 flex flex-wrap justify-between items-center gap-3">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
           <div class="flex flex-wrap items-center gap-3">
-            <h2 class="text-xl font-extrabold text-gray-800"><span id="modalEmpName"></span> 선생님 연가·대체휴무 관리</h2>
+            <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-regular fa-calendar-check text-indigo-600"></i><span><span id="modalEmpName"></span> 선생님 연가·대체휴무 관리</span></h2>
             <!-- 대상 직원 빠른 변경 드롭다운 -->
             <select id="modalEmpSelect" onchange="changeModalEmployee(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-bold text-indigo-700 outline-none focus:ring-2 focus:ring-indigo-400 bg-white cursor-pointer">
               <!-- 직원 목록 동적 생성 -->
             </select>
           </div>
-          <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 cursor-pointer">&times;</button>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 hover:bg-slate-200 w-9 h-9 rounded-lg text-xl font-bold cursor-pointer" aria-label="닫기"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="p-4 sm:p-5 overflow-y-auto flex-1 space-y-5">
@@ -771,7 +992,7 @@
     </div>
 
     <!-- 연가 삭제 확인 모달창 -->
-    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[60] p-4">
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center z-[60] p-4">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
         <h3 class="text-lg font-bold text-gray-800 mb-2">삭제 확인</h3>
         <p id="confirmMessage" class="text-sm text-gray-600 mb-6"></p>
@@ -879,15 +1100,15 @@
        [탭 2] 실시간 차량 배차 관리 섹션 (jeung-car 연결)
        ================================================================= -->
   <section id="section-car" class="hidden">
-    <div class="max-w-[1720px] mx-auto p-3 sm:p-6 no-print">
+    <div class="max-w-[1600px] mx-auto p-3 sm:p-6 no-print">
       <!-- 상단 헤더 -->
-      <header class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 mb-6 flex flex-wrap justify-between items-center gap-4 border border-slate-200/80">
+      <header class="workspace-header p-5 sm:p-6 mb-6 flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-md shadow-blue-500/20">
+          <div class="workspace-icon">
             <i class="fa-solid fa-car-side"></i>
           </div>
           <div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">실시간 차량 배차 관리 시스템</h1>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">차량 배차 및 운행 관리</h1>
             <p class="text-sm sm:text-base text-slate-600 mt-0.5 font-medium">운전자·동행자 배차 스케줄링 및 월간 운행내역 출력</p>
           </div>
         </div>
@@ -898,7 +1119,7 @@
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             실시간 저장 활성화됨
           </span>
-          <button onclick="openReportModal()" class="inline-flex items-center gap-2 text-sm sm:text-base px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm transition cursor-pointer">
+          <button onclick="openReportModal()" class="workspace-primary-btn inline-flex items-center gap-2 text-sm px-4 py-2.5 shadow-sm cursor-pointer">
             <i class="fa-solid fa-print"></i> 월별 배차 내역 출력 / 엑셀
           </button>
           <button onclick="openTripLogModal()" class="inline-flex items-center gap-2 text-sm sm:text-base px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-sm transition cursor-pointer">
@@ -915,7 +1136,7 @@
         <!-- 좌측 사이드바 (3칸): 팀원 관리, 차량 관리, 공유 메모장 -->
         <div class="lg:col-span-3 space-y-6">
           <!-- 1. 팀원(운전자/동행자) 명단 관리 -->
-          <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 border border-slate-200/80">
+          <div class="workspace-card p-5 sm:p-6">
             <div class="flex justify-between items-center mb-2.5">
               <h2 class="font-extrabold text-slate-900 flex items-center gap-2 text-base sm:text-lg">
                 <i class="fa-solid fa-users text-blue-600"></i> 팀원 명단 관리
@@ -939,7 +1160,7 @@
           </div>
 
           <!-- 2. 운행 차량 목록 관리 -->
-          <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 border border-slate-200/80">
+          <div class="workspace-card p-5 sm:p-6">
             <div class="flex justify-between items-center mb-2.5">
               <h2 class="font-extrabold text-slate-900 flex items-center gap-2 text-base sm:text-lg">
                 <i class="fa-solid fa-van-shuttle text-emerald-600"></i> 운행 차량 목록
@@ -960,7 +1181,7 @@
           </div>
 
           <!-- 3. 실시간 팀 공유 메모장 (차량용) -->
-          <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 border border-slate-200/80 flex flex-col">
+          <div class="workspace-card p-5 sm:p-6 flex flex-col">
             <div class="flex justify-between items-center mb-2">
               <h2 class="font-extrabold text-slate-900 flex items-center gap-2 text-base sm:text-lg">
                 <i class="fa-solid fa-note-sticky text-amber-500"></i> 차량 공유 메모장
@@ -977,7 +1198,7 @@
 
         <!-- 우측 메인 (9칸): 월별 배차 캘린더 -->
         <div class="lg:col-span-9">
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+          <div class="workspace-card overflow-hidden">
             <!-- 캘린더 상단 컨트롤 바 -->
             <div class="p-4 sm:p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4 bg-slate-50/40">
               <!-- 월 이동 네비게이션 -->
@@ -994,7 +1215,7 @@
                 <button onclick="goToday()" class="ml-1 px-3.5 py-2 text-sm font-bold rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 shadow-2xs transition cursor-pointer">
                   오늘
                 </button>
-                <button onclick="openBookingModal(formatDate(new Date()))" class="px-4 py-2 text-sm font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition cursor-pointer flex items-center gap-1.5">
+                <button onclick="openBookingModal(formatDate(new Date()))" class="workspace-primary-btn px-4 py-2 text-sm shadow-2xs cursor-pointer flex items-center gap-1.5">
                   <i class="fa-solid fa-plus"></i> 빠른 배차 신청
                 </button>
               </div>
@@ -1389,7 +1610,7 @@
       } else {
         leaveSec.classList.add('hidden');
         carSec.classList.remove('hidden');
-        btnCar.className = "px-4 py-2 rounded-lg text-sm font-extrabold transition flex items-center gap-2 cursor-pointer bg-blue-600 text-white shadow-xs";
+        btnCar.className = "px-4 py-2 rounded-lg text-sm font-extrabold transition flex items-center gap-2 cursor-pointer bg-indigo-600 text-white shadow-xs";
         btnLeave.className = "px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900";
         if (typeof window.renderCalendar === 'function') {
           window.renderCalendar();
@@ -1554,9 +1775,196 @@
     })();
   </script>
 
+
+  <!-- 휴가원 출력 전용: 연가 저장/차감 데이터와 완전히 분리 -->
+  <div id="vacationFormModal" class="fixed inset-0 z-[85] hidden items-center justify-center bg-slate-950/65 backdrop-blur-sm p-2 sm:p-4 no-print" role="dialog" aria-modal="true" aria-labelledby="vacationFormTitle">
+    <div class="bg-white w-full max-w-[1450px] max-h-[96vh] flex flex-col overflow-hidden rounded-2xl shadow-2xl border border-slate-200">
+      <div class="px-4 sm:px-6 py-3.5 border-b border-slate-200 flex flex-wrap justify-between items-center gap-3">
+        <div>
+          <h2 id="vacationFormTitle" class="text-lg sm:text-xl font-extrabold text-slate-900 flex gap-2 items-center"><i class="fa-solid fa-file-signature text-indigo-600"></i> 휴가원 자동 작성 · 출력</h2>
+          <p class="text-xs text-slate-500 mt-1">저장된 휴가 기록에서 불러옵니다. 여기서 수정한 문구는 원래 연가 기록을 변경하지 않습니다.</p>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button type="button" onclick="printVacationForm()" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-print"></i> A4 인쇄 / PDF 저장</button>
+          <button type="button" onclick="closeVacationForm()" class="rounded-xl bg-slate-100 hover:bg-slate-200 px-4 py-2 text-sm font-bold text-slate-700">닫기</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 min-h-0 flex-1 overflow-y-auto lg:overflow-hidden bg-slate-100">
+        <div class="lg:col-span-4 bg-white px-4 sm:px-5 py-5 border-r border-slate-200 space-y-4 overflow-y-visible lg:overflow-y-auto">
+          <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2.5 text-xs text-indigo-900 leading-relaxed">휴가 구분을 바꾸면 결재 요청 문구의 <b>연가 / 공가</b> 표현도 자동으로 변경됩니다. 소속·직위 등은 출력 전에 확인해주세요.</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label class="vacation-form-label" for="vFormType">휴가 구분</label>
+              <select id="vFormType" onchange="changeVacationFormType()" class="vacation-form-input">
+                <option value="연가">연가</option><option value="공가">공가</option><option value="교육공가">교육공가</option><option value="검진공가">검진공가</option><option value="대체휴무 사용">대체휴무 사용</option><option value="비공식 연가">비공식 연가</option><option value="직접입력">기타 직접 입력</option>
+              </select>
+            </div>
+            <div id="vFormCustomTypeWrap" class="hidden"><label class="vacation-form-label" for="vFormCustomType">기타 휴가명</label><input id="vFormCustomType" class="vacation-form-input" placeholder="예: 특별휴가" oninput="changeVacationFormType()"></div>
+            <div><label class="vacation-form-label" for="vFormTeam">소속</label><input id="vFormTeam" class="vacation-form-input" placeholder="예: 통합·기획조정팀" oninput="updateVacationFormPreview()"></div>
+            <div><label class="vacation-form-label" for="vFormPosition">직위(급)</label><input id="vFormPosition" class="vacation-form-input" placeholder="직위 또는 직급" oninput="updateVacationFormPreview()"></div>
+            <div class="sm:col-span-2"><label class="vacation-form-label" for="vFormApplicant">성명 / 휴가 신청인</label><input id="vFormApplicant" class="vacation-form-input" oninput="updateVacationFormPreview()"></div>
+          </div>
+          <div class="border-t border-slate-200 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label class="vacation-form-label" for="vFormStartDate">시작일</label><input id="vFormStartDate" type="date" class="vacation-form-input" onchange="updateVacationFormPreview()"></div>
+            <div><label class="vacation-form-label" for="vFormEndDate">종료일</label><input id="vFormEndDate" type="date" class="vacation-form-input" onchange="updateVacationFormPreview()"></div>
+            <div><label class="vacation-form-label" for="vFormTimeRange">사용 시간대</label><input id="vFormTimeRange" class="vacation-form-input" placeholder="예: 09:00 ~ 18:00" oninput="updateVacationFormPreview()"></div>
+            <div><label class="vacation-form-label" for="vFormDuration">휴가 사용량</label><input id="vFormDuration" class="vacation-form-input" placeholder="예: 1일 / 4시간" oninput="updateVacationFormPreview()"></div>
+            <div class="sm:col-span-2"><label class="vacation-form-label" for="vFormReason">사유</label><textarea id="vFormReason" rows="2" class="vacation-form-input" placeholder="휴가 사유" oninput="updateVacationFormPreview()"></textarea></div>
+            <div class="sm:col-span-2"><label class="vacation-form-label" for="vFormOther">기타 사항</label><textarea id="vFormOther" rows="2" class="vacation-form-input" placeholder="선택 입력" oninput="updateVacationFormPreview()"></textarea></div>
+          </div>
+          <div class="border-t border-slate-200 pt-3 space-y-3">
+            <div><label class="vacation-form-label" for="vFormPhrase">결재 요청 문구 (직접 수정 가능)</label><textarea id="vFormPhrase" rows="2" class="vacation-form-input" oninput="updateVacationFormPreview()"></textarea>
+              <button type="button" onclick="resetVacationPhrase()" class="mt-1.5 text-xs font-bold text-indigo-600 hover:underline">선택한 휴가 종류에 맞게 문구 다시 만들기</button></div>
+            <div><label class="vacation-form-label" for="vFormAppliedOn">신청일</label><input id="vFormAppliedOn" type="date" class="vacation-form-input" onchange="updateVacationFormPreview()"></div>
+          </div>
+        </div>
+        <div class="lg:col-span-8 overflow-y-visible lg:overflow-y-auto px-3 sm:px-6 py-5">
+          <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-bold text-slate-700">휴가원 A4 미리보기</h3><span class="text-xs text-slate-500">결재란은 수기 결재용으로 비워둠</span></div>
+          <div id="vacationPreviewHolder" class="flex justify-center pb-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 별도 인쇄 영역 : 모달 화면과 원본 기록을 건드리지 않음 -->
+  <div id="vacationPrintArea" class="vacation-print-only" aria-hidden="true"></div>
+
   <!-- =================================================================
        [스크립트 1] 연가 관리 시스템 (Firestore: yeoncheon-leave)
        ================================================================= -->
+
+  <script>
+    // 휴가원은 읽기 전용 출력 보조 기능이며 Firebase에 새 데이터를 쓰지 않습니다.
+    (function () {
+      const $ = id => document.getElementById(id);
+      const fld = id => ($(id)?.value || '').trim();
+      function escapeVacationText(v) {
+        return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      }
+      function htmlLines(v) { return escapeVacationText(v).replace(/\r?\n/g,'<br>') || '&nbsp;'; }
+      function dateInputLocalToday() {
+        const d = new Date();
+        return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+      }
+      function formatKoreanDay(raw) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(raw || '')) return raw || '';
+        const d = new Date(raw + 'T12:00:00');
+        if (Number.isNaN(d.getTime())) return raw;
+        const [year, mon, day] = raw.split('-');
+        return `${year}년 ${Number(mon)}월 ${Number(day)}일(${['일','월','화','수','목','금','토'][d.getDay()]})`;
+      }
+      function durationOfMins(value) {
+        const mins = Number(value);
+        if (!Number.isFinite(mins) || mins <= 0) return '';
+        const day = Math.floor(mins / 480), hour = Math.floor((mins % 480) / 60), rem = mins % 60;
+        return [day ? `${day}일` : '',hour ? `${hour}시간` : '',rem ? `${rem}분` : ''].filter(Boolean).join(' ');
+      }
+      function selectedType() {
+        const type = fld('vFormType');
+        return type === '직접입력' ? fld('vFormCustomType') : type;
+      }
+      function generatedPhrase() {
+        const name = selectedType() || '휴가';
+        if (name === '대체휴무 사용') return '아래와 같은 사유로 대체휴무를 사용하고자 하오니 결재하여 주시기 바랍니다.';
+        const last = name.charCodeAt(name.length - 1);
+        const obj = last >= 0xAC00 && last <= 0xD7A3 && (last - 0xAC00) % 28 ? '을' : '를';
+        return `아래와 같은 사유로 ${name}${obj} 받고자 하오니 결재하여 주시기 바랍니다.`;
+      }
+      function vacationDocumentMarkup() {
+        const start = fld('vFormStartDate'), end = fld('vFormEndDate');
+        const dates = start && end && start !== end
+          ? `${formatKoreanDay(start)} ~ ${formatKoreanDay(end)}`
+          : formatKoreanDay(start || end);
+        const times = fld('vFormTimeRange'), duration = fld('vFormDuration');
+        const timeLine = times || duration
+          ? `${escapeVacationText(times || '')}${duration ? ` (${escapeVacationText(duration)})` : ''}`
+          : '　　:　　 ~　　:　　 (　일)';
+        const who = fld('vFormApplicant');
+        const applicantDate = formatKoreanDay(fld('vFormAppliedOn')).replace(/\([일월화수목금토]\)$/, '');
+        // HWP 원본은 결재란과 상단 제목만 표 밖에 있고,
+        // 소속부터 기관명까지의 나머지 내용은 하나의 큰 표에 들어간다.
+        return `<article class="vacation-paper" aria-label="휴가원 A4 원본 양식">
+          <div class="vacation-document-title">휴　가　원</div>
+          <table class="vacation-approvals" aria-label="결재란"><thead><tr><th>팀장</th><th>부센터장</th><th>센터장</th></tr></thead>
+            <tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table>
+          <table class="vacation-original-table" aria-label="휴가원 원본 표"><colgroup><col style="width:35.8mm"><col></colgroup><tbody>
+            <tr><td colspan="2"><div class="vacation-original-header">
+              <div class="vacation-person-info">
+                <span class="person-key"><span class="person-caption">소　 속</span><span class="person-colon">:</span></span><span class="person-val">${escapeVacationText(fld('vFormTeam')) || '&nbsp;'}</span>
+                <span class="person-key"><span class="person-caption">직 위(급)</span><span class="person-colon">:</span></span><span class="person-val">${escapeVacationText(fld('vFormPosition')) || '&nbsp;'}</span>
+                <span class="person-key"><span class="person-caption">성　 명</span><span class="person-colon">:</span></span><span class="person-val">${escapeVacationText(who) || '&nbsp;'}</span>
+              </div>
+              <p class="vacation-document-phrase">${htmlLines(fld('vFormPhrase'))}</p>
+            </div></td></tr>
+            <tr class="vacation-original-period"><td class="vacation-label-col">기　　 간</td><td><div class="vacation-period-content">
+              <div class="vacation-period-date">${escapeVacationText(dates) || '　년　 월　 일( )'}</div>
+              <div>${timeLine}</div>
+            </div></td></tr>
+            <tr class="vacation-original-reason"><td class="vacation-label-col">사　　 유</td><td><div class="vacation-reason-content">${htmlLines(fld('vFormReason'))}</div></td></tr>
+            <tr class="vacation-original-other"><td class="vacation-label-col">기 타 사 항</td><td><div class="vacation-other-content">${htmlLines(fld('vFormOther'))}</div></td></tr>
+            <tr><td colspan="2"><div class="vacation-original-footer">
+              <div class="vacation-footer-date">${escapeVacationText(applicantDate) || '　 년　　 월　　 일'}</div>
+              <div class="vacation-footer-applicant">휴가 신청인 :　　${escapeVacationText(who) || '　　　　　'}　(인)</div>
+              <div class="vacation-footer-org">연천군정신건강복지센터</div>
+            </div></td></tr>
+          </tbody></table>
+        </article>`;
+      }
+      window.updateVacationFormPreview = function () {
+        const html = vacationDocumentMarkup();
+        $('vacationPreviewHolder').innerHTML = html;
+        $('vacationPrintArea').innerHTML = html;
+      };
+      window.resetVacationPhrase = function () {
+        $('vFormPhrase').value = generatedPhrase();
+        window.updateVacationFormPreview();
+      };
+      window.changeVacationFormType = function () {
+        const custom = fld('vFormType') === '직접입력';
+        $('vFormCustomTypeWrap').classList.toggle('hidden', !custom);
+        window.resetVacationPhrase();
+      };
+      window.showVacationForm = function (record, employee) {
+        if (!record || !employee) return;
+        const type = record.leaveType === '초과근무' || record.leaveType === '대체휴무' ? '대체휴무 사용' : (record.leaveType || '연가');
+        const options = [...$('vFormType').options].map(o => o.value);
+        $('vFormType').value = options.includes(type) ? type : '직접입력';
+        $('vFormCustomType').value = options.includes(type) ? '' : type;
+        $('vFormCustomTypeWrap').classList.toggle('hidden', options.includes(type));
+        // 원본 HWP 양식에 인쇄된 소속을 기본값으로 제공하되 수정 가능하게 둡니다.
+        $('vFormTeam').value = '통합·기획조정팀';
+        $('vFormPosition').value = '';
+        $('vFormApplicant').value = employee.name || '';
+        const dateMatches = String(record.dateStr || record.date || '').match(/\d{4}-\d{2}-\d{2}/g) || [];
+        $('vFormStartDate').value = dateMatches[0] || '';
+        $('vFormEndDate').value = dateMatches[1] || dateMatches[0] || '';
+        $('vFormTimeRange').value = record.timeRange || '';
+        $('vFormDuration').value = durationOfMins(record.usedMins);
+        $('vFormReason').value = record.reason || '';
+        $('vFormOther').value = '';
+        $('vFormAppliedOn').value = dateInputLocalToday();
+        window.resetVacationPhrase();
+        const modal = $('vacationFormModal');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+        $('vFormType').focus();
+      };
+      window.closeVacationForm = function () {
+        $('vacationFormModal').classList.add('hidden');
+        $('vacationFormModal').classList.remove('flex');
+      };
+      window.printVacationForm = function () {
+        if (!fld('vFormApplicant')) { alert('휴가 신청인 이름을 확인해주세요.'); return; }
+        if (!fld('vFormStartDate')) { alert('휴가 시작일을 확인해주세요.'); return; }
+        window.updateVacationFormPreview();
+        document.body.classList.remove('printing-leave');
+        document.body.classList.add('printing-vacation');
+        window.print();
+      };
+      window.addEventListener('afterprint', () => document.body.classList.remove('printing-vacation'));
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !$('vacationFormModal').classList.contains('hidden')) window.closeVacationForm();
+      });
+    })();
+  </script>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, setDoc, updateDoc, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -2419,6 +2827,7 @@
           <td class="p-2.5 whitespace-nowrap">${timeHtml}</td>
           <td class="p-2.5 text-sm">${reasonHtml}</td>
           <td class="p-2.5 text-right whitespace-nowrap">
+            <button onclick="openVacationFormFromRecord('${record.id}')" title="입력된 휴가 기록으로 휴가원 작성" class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded hover:bg-indigo-200 font-bold mr-1 transition cursor-pointer"><i class="fa-solid fa-print"></i> 휴가원</button>
             <button onclick="startEditRecord('${record.id}')" class="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded hover:bg-green-200 font-medium mr-1 transition cursor-pointer">수정</button>
             <button onclick="deleteRecord('${record.id}')" class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded hover:bg-red-200 font-medium transition cursor-pointer">삭제</button>
           </td>
@@ -2426,6 +2835,17 @@
         tbody.appendChild(tr);
       });
     }
+
+    // 각 휴가 사용기록에서 휴가원 양식으로 복사 (읽기 전용)
+    window.openVacationFormFromRecord = function(recordId) {
+      const record = recordsData.find(r => r.id === recordId);
+      const emp = record && employeesData.find(e => e.id === record.empId);
+      if (!record || !emp) { showLeaveToast('출력할 휴가 기록을 찾지 못했습니다.'); return; }
+      if (normalizeLeaveType(record.leaveType) === '대체휴무 발생') {
+        showLeaveToast('대체휴무 적립 기록은 휴가원 출력 대상이 아닙니다.'); return;
+      }
+      window.showVacationForm(record, emp);
+    };
 
     // [탭 2] 대체휴무 발생(적립) 전용 테이블 렌더링
     function renderCompAccrueRecords() {
@@ -2946,6 +3366,7 @@
     };
 
     window.printLeaveReport = function() {
+      document.body.classList.remove("printing-vacation");
       document.body.classList.add("printing-leave");
       window.print();
       setTimeout(() => {
@@ -3958,7 +4379,7 @@
     }
 
     function printCarReport() {
-      document.body.classList.remove('printing-leave');
+      document.body.classList.remove('printing-leave', 'printing-vacation');
       window.print();
     }
 
