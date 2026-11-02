@@ -1119,6 +1119,7 @@
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             실시간 저장 활성화됨
           </span>
+          <button type="button" onclick="monthlyAutoDispatch.open()" class="inline-flex items-center gap-2 text-sm sm:text-base px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold shadow-sm transition cursor-pointer"><i class="fa-solid fa-users-gear"></i> 월간 자동배차</button>
           <button onclick="openReportModal()" class="workspace-primary-btn inline-flex items-center gap-2 text-sm px-4 py-2.5 shadow-sm cursor-pointer">
             <i class="fa-solid fa-print"></i> 월별 배차 내역 출력 / 엑셀
           </button>
@@ -1587,6 +1588,86 @@
         </div>
       </div>
     </div>
+  <!-- [월간 스마트 자동배차] 실제 예약과 구분되는 별도 담당조 계획 -->
+  <div id="monthlyAutoModal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-slate-950/60 p-2 sm:p-5 no-print" role="dialog" aria-modal="true" aria-label="월간 스마트 자동배차">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden">
+      <div class="bg-gradient-to-r from-violet-700 to-indigo-700 text-white px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
+        <div><h2 class="font-extrabold text-lg sm:text-xl"><i class="fa-solid fa-users-gear mr-1"></i> 5일 순환형 월간 스마트 자동배차</h2><p class="text-xs text-indigo-100 mt-1">차량 1대 · 월~금 패턴을 주 단위로 순환 · 하루 1회 자동배차 · 실제 차량 예약과 별도</p></div>
+        <button type="button" onclick="monthlyAutoDispatch.close()" class="rounded-lg bg-white/20 hover:bg-white/30 px-3 py-2 font-bold" aria-label="닫기"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="font-bold text-sm text-slate-800">배차 대상 월<input id="monthlyMonth" type="month" onchange="monthlyAutoDispatch.load()" class="w-full block mt-1 px-3 py-2 rounded-lg border border-slate-300 bg-white"></label>
+          <label class="font-bold text-sm text-slate-800">대상 차량 (1대 선택)<select id="monthlyVehicle" onchange="monthlyAutoDispatch.load()" class="w-full block mt-1 px-3 py-2 rounded-lg border border-slate-300 bg-white"></select></label>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="border rounded-xl p-3"><h3 class="text-sm font-extrabold text-slate-800 mb-2">배차 참여 직원</h3><div id="monthlyMemberChooser" class="flex flex-wrap gap-2"></div></div>
+          <div class="border rounded-xl p-3"><h3 class="text-sm font-extrabold text-slate-800 mb-2">운전 가능 직원</h3><div id="monthlyDriverChooser" class="flex flex-wrap gap-2"></div></div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+          <label class="inline-flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked id="monthlyUsePublicHolidays" onchange="monthlyAutoDispatch.toggleHolidays()"> 한국 공휴일 자동 제외 시도 (외부 공휴일 조회)</label>
+          <label class="block text-xs text-slate-600">기관 휴무일 및 추가 제외 날짜 (쉼표 구분: 2026-11-19, 2026-11-20)
+            <textarea rows="2" id="monthlyOffDays" oninput="monthlyAutoDispatch.settingsChanged()" class="block w-full mt-1 rounded-lg border border-slate-300 p-2 text-sm bg-white" placeholder="공휴일 자동 조회가 실패하면 공휴일도 여기에 직접 입력하세요."></textarea>
+          </label>
+          <p class="text-[11px] text-slate-500">토·일요일은 항상 제외합니다. 공휴일 자료는 외부 서비스 기반이므로 임시공휴일·기관 휴무일 등은 직접 확인하여 추가해 주세요.</p>
+        </div>
+        <div class="bg-violet-50/70 border border-violet-200 rounded-xl p-3 space-y-3">
+          <h3 class="text-sm font-extrabold text-violet-950"><i class="fa-solid fa-calendar-xmark mr-1"></i> 자동배차 제외 요일 · 날짜 설정</h3>
+          <p class="text-xs text-violet-800">기본 원칙: <b>매주 목요일 오전은 항상 제외</b>합니다. 다른 반복 설정은 선택 차량의 다른 달에도 적용할 수 있습니다.</p>
+          <div class="space-y-2 rounded-lg border border-violet-200 bg-white p-3">
+            <div class="text-xs font-extrabold text-slate-700">매주 반복 제외 (차량별 설정 · 목요일 오전 기본 제외는 삭제 불가)</div>
+            <div class="flex flex-wrap gap-2 items-end">
+              <label class="text-xs font-bold">요일<select id="monthlyWeekday" class="block border border-slate-300 rounded-lg px-2 py-2 mt-1"><option value="1">월요일</option><option value="2">화요일</option><option value="3">수요일</option><option value="4" selected>목요일</option><option value="5">금요일</option></select></label>
+              <label class="text-xs font-bold">제외 시간<select id="monthlyWeekPeriod" class="block border border-slate-300 rounded-lg px-2 py-2 mt-1"><option value="AM">오전</option><option value="PM">오후</option><option value="ALL">종일</option></select></label>
+              <label class="text-xs font-bold flex-1 min-w-[120px]">사유<input id="monthlyWeekReason" value="정기회의" placeholder="예: 정기회의" class="w-full block border border-slate-300 rounded-lg px-2 py-2 mt-1"></label>
+              <button type="button" onclick="monthlyAutoDispatch.addWeekly()" class="text-xs font-bold px-3 py-2 rounded-lg bg-violet-700 text-white">+ 반복 제외 추가</button>
+            </div>
+            <div id="monthlyWeeklyList" class="flex flex-wrap gap-2"></div>
+            <button type="button" onclick="monthlyAutoDispatch.saveWeekly()" class="text-xs rounded-lg border border-violet-400 text-violet-800 px-3 py-1.5 font-bold">반복 규칙 별도 저장 (다음 달에도 적용)</button>
+          </div>
+          <div class="space-y-2 rounded-lg border border-violet-200 bg-white p-3">
+            <div class="text-xs font-extrabold text-slate-700">특정 날짜 제외 (선택한 달·차량에만 적용)</div>
+            <div class="flex flex-wrap gap-2 items-end">
+              <label class="text-xs font-bold">날짜<input id="monthlySpecificDate" type="date" class="block border border-slate-300 rounded-lg px-2 py-2 mt-1"></label>
+              <label class="text-xs font-bold">제외 시간<select id="monthlySpecificPeriod" class="block border border-slate-300 rounded-lg px-2 py-2 mt-1"><option value="AM">오전</option><option value="PM">오후</option><option value="ALL">종일</option></select></label>
+              <label class="text-xs font-bold flex-1 min-w-[120px]">사유<input id="monthlySpecificReason" placeholder="예: 전체 교육" class="block w-full border border-slate-300 rounded-lg px-2 py-2 mt-1"></label>
+              <button type="button" onclick="monthlyAutoDispatch.addSpecific()" class="text-xs font-bold px-3 py-2 rounded-lg bg-violet-700 text-white">+ 날짜 제외 추가</button>
+            </div>
+            <div id="monthlySpecificList" class="flex flex-wrap gap-2"></div>
+          </div>
+          <p class="text-[11px] text-violet-800">제외 설정을 바꾼 후 <b>[자동배차 생성/재생성]</b>을 눌러 미리보기에 반영해 주세요. 이미 확정된 실제 배차는 삭제하지 않습니다.</p>
+        </div>
+        <div id="monthlyNotice" class="text-xs font-bold p-3 rounded-xl border bg-blue-50 border-blue-200 text-blue-800" aria-live="polite">차량과 배차 월을 선택해 주세요.</div>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div><h3 class="font-extrabold text-slate-900">배차 미리보기</h3><p id="monthlySummary" class="text-xs text-slate-600">아직 생성된 계획이 없습니다.</p></div>
+          <div class="flex flex-wrap gap-2"><button type="button" onclick="monthlyAutoDispatch.generate()" class="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 5일 순환 자동배차 생성 / 재생성</button><button type="button" onclick="monthlyAutoDispatch.resetPreview()" class="px-3 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-sm font-bold">미리보기 초기화</button><button type="button" onclick="monthlyAutoDispatch.load()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm font-bold">저장된 계획 다시 불러오기</button></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+          <div class="lg:col-span-8 overflow-x-auto border border-slate-200 rounded-xl max-h-[430px] overflow-y-auto">
+            <table class="w-full min-w-[600px] text-sm text-left border-collapse"><thead class="sticky top-0 bg-slate-100 z-10 text-xs text-slate-700"><tr><th class="p-2">날짜</th><th class="p-2">구분</th><th class="p-2">운전자</th><th class="p-2">동행자</th><th class="p-2">상태 / 관리</th></tr></thead><tbody id="monthlyRows"><tr><td colspan="5" class="p-6 text-center text-slate-400">자동배차 생성 버튼으로 편성할 수 있습니다.</td></tr></tbody></table>
+          </div>
+          <div class="lg:col-span-4 border rounded-xl p-3 h-fit"><h3 class="text-sm font-extrabold text-slate-900 mb-2"><i class="fa-solid fa-chart-simple text-indigo-600 mr-1"></i> 직원별 배차 균형</h3><div id="monthlyPlanStats" class="text-xs text-slate-500">생성 후 표시됩니다.</div></div>
+        </div>
+        <div class="border border-amber-200 bg-amber-50/70 rounded-xl p-3 space-y-2"><div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-sm font-extrabold text-amber-900"><i class="fa-solid fa-box-archive mr-1"></i> 만료된 미확정 계획 (복구 가능)</h3><span class="text-[11px] text-amber-800">한국시간 기준 배차 다음 날 00:00부터 자동 만료</span></div><div id="monthlyExpiredRows" class="flex flex-col gap-2 text-xs text-slate-600">만료된 계획이 없습니다.</div></div>
+        <p id="monthlyValidation" class="text-xs font-bold text-slate-500">연가·기존 배차를 확인한 후 저장됩니다.</p>
+      </div>
+      <div class="border-t bg-slate-50 px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center gap-2">
+        <span class="text-[11px] text-slate-600">기존 계획·수동 고정·실제 예약을 보호하고 필요한 자리만 조정합니다. <b>계획 저장</b> 전에는 서버에 반영되지 않습니다.</span>
+        <div class="flex flex-wrap gap-2"><button type="button" onclick="monthlyAutoDispatch.print()" class="px-3 py-2 rounded-xl border bg-white text-slate-700 text-sm font-bold">인쇄/PDF</button><button type="button" onclick="monthlyAutoDispatch.exportCSV()" class="px-3 py-2 rounded-xl border bg-white text-emerald-700 text-sm font-bold">엑셀(CSV)</button><button type="button" onclick="monthlyAutoDispatch.deletePlan()" class="px-3 py-2 rounded-xl border border-rose-200 bg-white text-rose-700 text-sm font-bold"><i class="fa-solid fa-trash-can mr-1"></i> 선택한 달 전체 계획 삭제</button><button type="button" id="monthlySaveBtn" onclick="monthlyAutoDispatch.save()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-extrabold">월간 계획 저장</button></div>
+      </div>
+    </div>
+  </div>
+
+<div id="monthlyPrintArea" aria-hidden="true" style="display:none"></div>
+<style>
+@media print {
+  body.printing-monthly #printArea, body.printing-monthly #printArea * {visibility:hidden !important;}
+  body.printing-monthly #monthlyPrintArea {display:block !important; position:absolute;left:0;top:0;width:100%;padding:8mm;background:white;z-index:99999;}
+  body.printing-monthly #monthlyPrintArea, body.printing-monthly #monthlyPrintArea * {visibility:visible !important;}
+  body.printing-monthly #monthlyPrintArea th,body.printing-monthly #monthlyPrintArea td {border:1px solid #94a3b8;padding:4px;text-align:center;}
+}
+</style>
+
   </section>
 
   <!-- =================================================================
@@ -1612,6 +1693,7 @@
         carSec.classList.remove('hidden');
         btnCar.className = "px-4 py-2 rounded-lg text-sm font-extrabold transition flex items-center gap-2 cursor-pointer bg-indigo-600 text-white shadow-xs";
         btnLeave.className = "px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900";
+        if(window.monthlyAutoDispatch)window.monthlyAutoDispatch.invalidateCalendar();
         if (typeof window.renderCalendar === 'function') {
           window.renderCalendar();
         }
@@ -3615,28 +3697,25 @@
       }
     }
 
-    function saveToDataSource() {
+    function saveToDataSource(awaitWrite = false) {
       localStorage.setItem('jeungCarDispatchBackup', JSON.stringify(state));
       window.crossScheduleAlerts.setBookings(state.bookings, activeSyncMode !== 'LOCAL');
       renderAll();
 
-      if (rtdbRef) {
-        rtdbRef.set(state).catch((err) => {
-          console.warn("RTDB 저장 실패:", err);
-        });
+      if (activeSyncMode === 'RTDB' && rtdbRef) {
+        const task=rtdbRef.set(state);if(awaitWrite)return task;task.catch(err=>console.warn("RTDB 저장 실패:",err));return Promise.resolve();
       }
 
       if (activeSyncMode === 'FIRESTORE' && firestoreDocRef) {
-        firestoreDocRef.set({
+        const task=firestoreDocRef.set({
           members: state.members,
           vehicles: state.vehicles,
           bookings: JSON.stringify(state.bookings || {}),
           sharedMemo: state.sharedMemo || "",
           updatedAt: Date.now()
-        }).catch((err) => {
-          console.warn("Firestore 저장 실패:", err);
-        });
+        });if(awaitWrite)return task;task.catch(err=>console.warn("Firestore 저장 실패:",err));return Promise.resolve();
       }
+      return Promise.resolve();
     }
 
     function fillPresetUrl(url) {
@@ -3922,6 +4001,7 @@
       });
 
       const grid = document.getElementById('calendarGrid');
+      if(window.monthlyAutoDispatch) window.monthlyAutoDispatch.ensureCalendar(`${year}-${String(month+1).padStart(2,'0')}`);
       let html = '';
 
       for (let i = 0; i < firstDay; i++) {
@@ -3965,6 +4045,7 @@
               <div class="space-y-1.5">
                 ${pmBookings.map(b => renderBookingBadge(b, 'PM')).join('')}
               </div>
+              ${window.monthlyAutoDispatch ? window.monthlyAutoDispatch.calendarBadge(dateStr,selectedVehicle) : ''}
             </div>
           </div>
         `;
@@ -4190,6 +4271,7 @@
     }
 
     function closeBookingModal() {
+      window.monthlyAutoDispatch?.clearPendingConfirm();
       const modal = document.getElementById('bookingModal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
@@ -4228,6 +4310,8 @@
       const tripTitle = document.getElementById('bookingTripTitle').value.trim();
 
       const newBooking = { id, date, vehicle, driver, companions, meridiem, startTime, endTime, memo, destination, content, purpose, tripTitle };
+      const monthlyLink=window.monthlyAutoDispatch?.linkForBooking(newBooking);
+      if(monthlyLink) newBooking.monthlyPlanRef=monthlyLink;
 
       const conflict = Object.values(state.bookings || {}).find(b => {
         if (b.id === id || b.date !== date || b.vehicle !== vehicle) return false;
@@ -4264,12 +4348,22 @@
       pendingBookingData = null;
     }
 
-    function commitBookingSave(bookingObj) {
+    async function commitBookingSave(bookingObj) {
       if (!state.bookings) state.bookings = {};
+      const before=state.bookings[bookingObj.id];
       state.bookings[bookingObj.id] = bookingObj;
-      saveToDataSource();
-      closeBookingModal();
-      showCarToast('배차 일정이 저장되었습니다.', 'success');
+      try {
+        await saveToDataSource(true);
+        closeBookingModal();
+        showCarToast('배차 일정이 저장되었습니다.', 'success');
+        if(bookingObj.monthlyPlanRef){
+          try{await window.monthlyAutoDispatch.finalizeConfirmed(bookingObj);}
+          catch(e){showCarToast('실제 배차는 저장됐지만 월간 계획 상태 반영에 실패했습니다. 월간 자동배차에서 다시 확인해 주세요.','warn');}
+        }
+      }catch(e){
+        if(before)state.bookings[bookingObj.id]=before;else delete state.bookings[bookingObj.id];
+        renderAll();showCarToast('서버 저장에 실패했습니다. 연결 확인 후 다시 시도하세요.','error');
+      }
     }
 
     function toggleDeleteConfirm(show) {
@@ -4710,6 +4804,670 @@
     window.crossScheduleAlerts.setBookings({}, false);
     initDataSync();
   </script>
+<script>
+/* 월간 스마트 자동배차: 실제 예약과 별도로 담당조 '계획'만 저장 */
+(function () {
+  'use strict';
+  const TIMES = { AM: ['09:00','12:00'], PM: ['13:30','17:30'] };
+  const LOCAL_KEY = 'yc_monthly_team_plan_v1';
+  const RULE_KEY = 'yc_monthly_dispatch_weekly_v1';
+  const DEFAULT_WEEKLY = [{weekday:4,period:'AM',reason:'정기회의'}];
+  const WEEK_NAMES=['일','월','화','수','목','금','토'];
+  const PERIOD_NAMES={AM:'오전',PM:'오후',ALL:'종일'};
+  const calendarCache=new Map(), calendarLoading=new Set();
+  let pendingConfirm=null;
+  let draft = null, savedRevision = null, savedPlansInMonth = [], holidayData = new Set();
+  let holidayReady = false, cloudMode = 'LOCAL', openingSeq = 0;
+  const el = id => document.getElementById(id);
+  const normalized = x => String(x || '').replace(/\s+/g, '').trim();
+  const slotKey = s => `${s.date}/${s.period}`;
+  const people = b => [b.driver || b.member, ...(Array.isArray(b.companions) ? b.companions : [])].filter(Boolean);
+  const text = s => escapeHtml(s);
+  const vehicleKey = name => btoa(unescape(encodeURIComponent(name))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const monthKey = () => (draft && draft.month) || '';
+  const dateInMonth = (date, month) => String(date || '').startsWith(month + '-');
+  const minutes = value => window.crossScheduleAlerts.toMinutes(value);
+  const overlap = (a,b,c,d) => { const [x,y,z,w]=[a,b,c,d].map(minutes); return [x,y,z,w].every(t=>t!==null) && x<w && y>z; };
+  const alertBox = (msg, bad=false) => { const box=el('monthlyNotice'); box.textContent=msg; box.className=`text-xs font-bold p-3 rounded-xl border ${bad?'bg-rose-50 border-rose-200 text-rose-800':'bg-blue-50 border-blue-200 text-blue-800'}`; };
+  const calendarDates = month => { const [y,m]=month.split('-').map(Number), last=new Date(y,m,0).getDate(), dates=[]; for(let d=1;d<=last;d++){ const ds=`${month}-${String(d).padStart(2,'0')}`; const dow=new Date(y,m-1,d).getDay(); if(dow!==0&&dow!==6) dates.push(ds); } return dates; };
+  const validMonth = m => /^\d{4}-(0[1-9]|1[0-2])$/.test(m);
+  const todayKorea = () => new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  const isPast = row => !!row?.date && row.date<todayKorea();
+  const validDateInMonth = (date,month) => /^\d{4}-\d{2}-\d{2}$/.test(date) && dateInMonth(date,month) && Number(date.slice(8))>=1 && Number(date.slice(8))<=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate();
+  const ruleApplies=(rule,date,period) => Number(rule.weekday)===new Date(date+'T12:00:00').getDay()&&(rule.period==='ALL'||rule.period===period);
+  const dateRuleApplies=(rule,date,period)=>rule.date===date&&(rule.period==='ALL'||rule.period===period);
+  const slotExcluded=(date,period) => (period==='AM' && new Date(date+'T12:00:00').getDay()===4) || (draft?.weeklyRules||[]).some(r=>ruleApplies(r,date,period))||(draft?.specificExclusions||[]).some(r=>dateRuleApplies(r,date,period));
+  const excludedReason=(date,period) => [...(period==='AM' && new Date(date+'T12:00:00').getDay()===4 ? ['정기회의 (목요일 오전 기본 제외)'] : []),...(draft?.specificExclusions||[]).filter(r=>dateRuleApplies(r,date,period)).map(r=>r.reason||'배차 제외'),...(draft?.weeklyRules||[]).filter(r=>ruleApplies(r,date,period)).map(r=>r.reason||'배차 제외')].filter((x,i,a)=>a.indexOf(x)===i).join(', ')||'배차 제외';
+  const effectiveStatus = row => row.status==='assigned'&&isPast(row)?'expired':row.status;
+  const rowHasBooking = (row, vehicle) => Object.values(state.bookings||{}).find(b=>b.monthlyPlanRef?.vehicle===vehicle&&b.monthlyPlanRef?.date===row.date&&b.monthlyPlanRef?.period===row.period) || (row.bookingId && state.bookings?.[row.bookingId]);
+  const excludedDates = () => new Set([...(draft?.manualHolidays||[]), ...(draft?.usePublicHolidays && holidayReady ? holidayData : [])]);
+  const parseDates = s => [...new Set(String(s||'').split(/[\s,;]+/).map(x=>x.trim()).filter(Boolean))];
+  const isLeaveReady = () => !!window.crossScheduleAlerts?.leaveReady;
+  const compareLeave = (name, date, period) => {
+    const bridge=window.crossScheduleAlerts;
+    if(!bridge.leaveReady) return true; // 검증 불가능하면 배정 금지
+    const emp=bridge.employees.find(e=>normalized(e.name)===normalized(name));
+    if(!emp) return true; // 직원 이름을 매칭할 수 없으면 안전하게 제외
+    return bridge.leaveRecords.some(r=>r.empId===emp.id && bridge.isAbsence(r.leaveType) && bridge.overlaps(r,{date,startTime:TIMES[period][0],endTime:TIMES[period][1]}));
+  };
+  const externalBooked = (name,date,period) => {
+    const [start,end]=TIMES[period];
+    const inActual=Object.values(state.bookings||{}).some(b=>b.date===date && overlap(start,end,b.startTime,b.endTime) && people(b).some(n=>normalized(n)===normalized(name)));
+    if(inActual) return true;
+    return savedPlansInMonth.some(p=>p.vehicle!==draft.vehicle && Array.isArray(p.rows) && p.rows.some(r=>r.date===date && ['assigned','recovered'].includes(effectiveStatus(r)) && overlap(start,end,...TIMES[r.period]) && [r.driver,r.companion].some(n=>normalized(n)===normalized(name))));
+  };
+  // 자동 계획에서만 날짜 전체 중복을 금지: 수동 차량 예약 자체는 수정하지 않습니다.
+  const externalBookedAnyPeriod = (name,date) => {
+    if(Object.values(state.bookings||{}).some(b=>b.date===date && people(b).some(n=>normalized(n)===normalized(name))))return true;
+    return savedPlansInMonth.some(p=>p.vehicle!==draft.vehicle && (p.rows||[]).some(r=>r.date===date && ['assigned','recovered'].includes(effectiveStatus(r)) && [r.driver,r.companion].some(n=>normalized(n)===normalized(name))));
+  };
+  const reservation = (date,period) => Object.values(state.bookings||{}).find(b=>b.date===date && b.vehicle===draft.vehicle && overlap(...TIMES[period],b.startTime,b.endTime));
+  const candidateStatus = (row, role, name) => {
+    if(!name || !(draft.members||[]).includes(name)) return '배차 대상 직원이 아닙니다.';
+    if(role==='driver' && !(draft.drivers||[]).includes(name)) return '운전 가능 직원이 아닙니다.';
+    if(compareLeave(name,row.date,row.period)) return '연가·휴무 중이거나 연가 직원 명단과 이름이 일치하지 않습니다.';
+    if(externalBookedAnyPeriod(name,row.date)) return '같은 날의 기존 수동 배차(운전자·동행자 포함) 또는 다른 차량 계획과 중복됩니다.';
+    return '';
+  };
+  function validateRows() {
+    if(!draft)return ['월간 계획을 선택하세요.'];
+    const issues=[],used=new Set(), usedDay=new Set(), all=new Set();
+    const invalid=(draft.manualHolidays||[]).filter(d=>!validDateInMonth(d,draft.month));
+    if(invalid.length)issues.push('제외 날짜 형식 오류: '+invalid.slice(0,3).join(', '));
+    const invalidSpecific=(draft.specificExclusions||[]).filter(r=>!validDateInMonth(r.date,draft.month)||!['AM','PM','ALL'].includes(r.period));
+    if(invalidSpecific.length)issues.push('특정 날짜 제외 설정에 오류가 있습니다.');
+    if(draft.usePublicHolidays&&!holidayReady)issues.push('공휴일 자료 확인에 실패했습니다.');
+    for(const row of draft.rows){
+      const key=slotKey(row);
+      if(all.has(key))issues.push(key+': 같은 배차 시간이 중복되어 있습니다.');
+      all.add(key);
+      const status=effectiveStatus(row);
+      if(excludedDates().has(row.date)&&!['excluded','deleted','expired','confirmed'].includes(status))issues.push(key+': 종일 제외 날짜와 충돌합니다.');
+      if(slotExcluded(row.date,row.period)&&!['excluded','deleted','expired','confirmed'].includes(status))issues.push(key+': 제외 시간대와 충돌합니다.');
+      if(row.status==='reserved'&&!reservation(row.date,row.period))issues.push(key+': 기존 예약 변경됨. 다시 생성하세요.');
+      if(!['assigned','recovered'].includes(status))continue;
+      if(!row.driver||!row.companion||row.driver===row.companion){issues.push(key+': 운전자·동행자 지정 오류');continue;}
+      if(reservation(row.date,row.period)){issues.push(key+': 실제 차량 예약이 존재합니다.');continue;}
+      for(const [role,name] of [['driver',row.driver],['companion',row.companion]]){
+        const problem=candidateStatus(row,role,name);if(problem)issues.push(key+': '+name+' '+problem);
+        const same=key+'/'+normalized(name),dayKey=row.date+'/'+normalized(name);if(used.has(same))issues.push(key+': 직원 중복');used.add(same);if(usedDay.has(dayKey))issues.push(key+': 같은 직원의 하루 오전·오후 자동배차 중복');usedDay.add(dayKey);
+      }
+    }
+    if(!isLeaveReady())issues.push('연가 데이터 동기화가 완료되지 않았습니다.');
+    if(draft.rows.length){
+      for(const date of calendarDates(draft.month).filter(d=>!excludedDates().has(d)))for(const period of ['AM','PM']){
+        if(!all.has(`${date}/${period}`))issues.push(`${date}/${period}: 배차 상태가 누락되었습니다.`);
+      }
+    }
+    return issues;
+  }
+  function baselineCounts() {
+    const counts=new Map(draft.members.map(n=>[n,{total:0,driver:0,companion:0,AM:0,PM:0}]));
+    // 기존 수동 배차까지 반영해 과중 배정을 최소화
+    for(const b of Object.values(state.bookings||{})){
+      if(!dateInMonth(b.date,draft.month)) continue;
+      for(const role of ['driver','companion']) {
+        const names=role==='driver'?[b.driver||b.member]:Array.isArray(b.companions)?b.companions:[];
+        for(const n of names){ const actual=draft.members.find(x=>normalized(x)===normalized(n)); if(!actual) continue; const c=counts.get(actual); c.total++;c[role]++; if(b.meridiem==='AM'||b.meridiem==='PM') c[b.meridiem]++; }
+      }
+    }
+    for(const p of savedPlansInMonth){if(p.vehicle===draft.vehicle)continue;for(const r of p.rows||[]){if(!['assigned','recovered'].includes(effectiveStatus(r)))continue;for(const role of ['driver','companion']){const name=r[role],c=counts.get(name);if(c){c.total++;c[role]++;c[r.period]++;}}}}
+    return counts;
+  }
+  // 5일 순환형 기본 배차표: 근무일/오전·오후의 자리를 먼저 안정적으로 만들고
+  // 주가 바뀔 때마다 명단을 한 칸 순환합니다. 실제 연가/예약은 아래 편성 단계에서만 적용합니다.
+  function createFiveDayTemplate(){
+    const pattern=new Map(), stats=new Map(draft.members.map(n=>[n,{total:0,driver:0,companion:0}]));
+    const pairCount=new Map();
+    for(let weekday=1;weekday<=5;weekday++){
+      const daily=new Set();
+      for(const period of ['AM','PM']){
+        if(weekday===4&&period==='AM')continue;
+        let best=Infinity,winner=null;
+        for(const driver of draft.drivers)for(const companion of draft.members){
+          if(driver===companion||daily.has(driver)||daily.has(companion))continue;
+          const dc=stats.get(driver),cc=stats.get(companion);
+          const pair=[driver,companion].sort().join('|');
+          const score=(dc.total+cc.total)*14+(dc.driver+cc.companion)*5+
+            (pairCount.get(pair)||0)*8+
+            ((draft.members.indexOf(driver)*17+draft.members.indexOf(companion)*7+weekday*11+(period==='AM'?0:5))%19)/100;
+          if(score<best){best=score;winner=[driver,companion];}
+        }
+        if(!winner)continue;
+        const [driver,companion]=winner;
+        pattern.set(`${weekday}/${period}`,{driver,companion});
+        for(const [name,role] of [[driver,'driver'],[companion,'companion']]){
+          const c=stats.get(name);c.total++;c[role]++;daily.add(name);
+        }
+        const key=[driver,companion].sort().join('|');pairCount.set(key,(pairCount.get(key)||0)+1);
+      }
+    }
+    return pattern;
+  }
+  function weekNumber(date){
+    const [y,m,d]=date.split('-').map(Number),first=new Date(Date.UTC(y,m-1,1));
+    const start=Date.UTC(y,m-1,1)-((first.getUTCDay()+6)%7)*86400000;
+    return Math.floor((Date.UTC(y,m-1,d)-start)/604800000);
+  }
+  function cyclicPreference(row,pattern){
+    const weekday=new Date(row.date+'T12:00:00').getDay(),base=pattern.get(`${weekday}/${row.period}`);
+    if(!base)return null;
+    const week=weekNumber(row.date),rotate=(list,value)=>list[(list.indexOf(value)+week)%list.length];
+    let driver=rotate(draft.drivers,base.driver),companion=rotate(draft.members,base.companion);
+    // 모두 운전 가능할 때에는 격주로 운전자·동행자 역할도 순환합니다.
+    if(week%2===1 && draft.drivers.includes(companion)) [driver,companion]=[companion,driver];
+    if(driver===companion)companion=draft.members.find((n,i)=>n!==driver&&i>=((draft.members.indexOf(base.companion)+week)%draft.members.length)) || draft.members.find(n=>n!==driver);
+    return {driver,companion};
+  }
+  function generateMonthlyPlan() {
+    if(!draft)return;
+    if(!isLeaveReady()){alertBox('연가 동기화가 완료되지 않아 자동배차를 실행할 수 없습니다.',true);return;}
+    if(draft.members.length<2||draft.drivers.length<1){alertBox('배차 참여 직원 2명 이상과 운전 가능 직원 1명 이상을 지정해 주세요.',true);return;}
+    const unmatched=draft.members.filter(n=>!window.crossScheduleAlerts.employees.some(e=>normalized(e.name)===normalized(n)));
+    if(unmatched.length){alertBox('연가 명단과 이름이 일치하지 않습니다: '+unmatched.join(', '),true);return;}
+    const previous=JSON.stringify(draft.rows),wasChanged=draft.changed,holidays=excludedDates(),rows=[];
+    // 고정/확정/삭제 건은 기존 내용을 유지합니다. 실제 예약이 있는 시간은 편성하지 않습니다.
+    for(const date of calendarDates(draft.month))for(const period of ['AM','PM']){
+      const prior=(draft.rows||[]).find(r=>r.date===date&&r.period===period);
+      if(prior?.status==='confirmed'&&rowHasBooking(prior,draft.vehicle)){rows.push({...prior});continue;}
+      if(prior?.status==='deleted'){rows.push({...prior});continue;}
+      if(prior?.locked&&['assigned','recovered','unfilled'].includes(prior.status)){rows.push({...prior});continue;}
+      if(holidays.has(date))continue;
+      if(slotExcluded(date,period)){rows.push({date,period,status:'excluded',reason:excludedReason(date,period),driver:'',companion:'',locked:false});continue;}
+      if(isPast({date})){rows.push(prior?{...prior}:{date,period,status:'expired',driver:'',companion:'',locked:false});continue;}
+      if(reservation(date,period)){rows.push({date,period,status:'reserved',driver:'',companion:'',locked:false});continue;}
+      // 재생성 시 정상 기존 계획은 교체하지 않고, 빈자리/충돌 자리만 재편성합니다.
+      rows.push({date,period,status:'unfilled',driver:'',companion:'',locked:false,
+        ...(prior?.status==='assigned'?{_previous:prior}:{} )});
+    }
+    const counts=baselineCounts(), pairs=new Map(),history=new Map(),dailyUsed=new Map();
+    const add=(r)=>{
+      for(const role of ['driver','companion']){
+        const name=r[role],c=counts.get(name);if(!c)continue;
+        c.total++;c[role]++;c[r.period]++;
+        if(!history.has(name))history.set(name,[]);history.get(name).push(r.date);
+        if(!dailyUsed.has(r.date))dailyUsed.set(r.date,new Set());dailyUsed.get(r.date).add(normalized(name));
+      }
+      const pair=[r.driver,r.companion].sort().join('|');pairs.set(pair,(pairs.get(pair)||0)+1);
+    };
+    // 잠긴 계획을 먼저 반영하여, 잠기지 않은 계획이 같은 날 그 사람을 사용하지 않게 합니다.
+    rows.filter(r=>r.locked&&['assigned','recovered'].includes(effectiveStatus(r))).forEach(add);
+    // 수동 편집 중인 미완성 고정행의 입력값 역시 다른 자동배차에서 사용하지 않습니다.
+    for(const r of rows.filter(r=>r.locked&&r.status==='unfilled'))for(const name of [r.driver,r.companion])if(name){if(!dailyUsed.has(r.date))dailyUsed.set(r.date,new Set());dailyUsed.get(r.date).add(normalized(name));}
+    const stillValid=r=>r.driver&&r.companion&&normalized(r.driver)!==normalized(r.companion) &&
+      !candidateStatus(r,'driver',r.driver)&&!candidateStatus(r,'companion',r.companion)&&
+      !(dailyUsed.get(r.date)?.has(normalized(r.driver)))&&!(dailyUsed.get(r.date)?.has(normalized(r.companion)))&&
+      !reservation(r.date,r.period)&&!slotExcluded(r.date,r.period)&&!holidays.has(r.date);
+    // 원래 순서대로 기존 정상 계획을 최대한 보존합니다.
+    for(const row of rows){
+      if(!row._previous)continue;
+      const prior=row._previous;delete row._previous;
+      if(stillValid(prior)) {Object.assign(row,prior);add(row);}
+    }
+    const pattern=createFiveDayTemplate();
+    for(const row of rows.filter(r=>r.status==='unfilled'&&!r.locked)){
+      const preferred=cyclicPreference(row,pattern),used=dailyUsed.get(row.date)||new Set();
+      const eligible=(name,role)=>!used.has(normalized(name))&&!candidateStatus(row,role,name);
+      let best=Infinity,winner=null;
+      for(const driver of draft.drivers){
+        if(!eligible(driver,'driver'))continue;
+        for(const companion of draft.members){
+          if(normalized(driver)===normalized(companion)||!eligible(companion,'companion'))continue;
+          const dc=counts.get(driver),cc=counts.get(companion),pair=[driver,companion].sort().join('|');
+          const prevDay=name=>(history.get(name)||[]).filter(v=>Math.abs((new Date(row.date+'T12:00')-new Date(v+'T12:00'))/86400000)===1).length;
+          // 균형을 우선하되, 균형이 비슷하면 해당 요일의 5일 패턴을 최대한 따릅니다.
+          const score=(dc.total+cc.total)*20+(dc.driver+cc.companion)*7+
+            (dc[row.period]+cc[row.period])*4+(pairs.get(pair)||0)*9+
+            (prevDay(driver)+prevDay(companion))*2+
+            (preferred?(driver===preferred.driver?0:14)+(companion===preferred.companion?0:14):0)+
+            ((draft.members.indexOf(driver)*17+draft.members.indexOf(companion)*7+Number(row.date.slice(-2)))%31)/1000;
+          if(score<best){best=score;winner=[driver,companion];}
+        }
+      }
+      if(winner){row.status='assigned';row.driver=winner[0];row.companion=winner[1];add(row);}
+      // 배정 가능한 2명이 없으면 미배정. 수동 예약은 원래대로 하루 2회도 허용.
+    }
+    draft.rows=rows;
+    draft.changed=wasChanged||JSON.stringify(rows)!==previous;
+    renderMonthlyPreview();
+    const unfilled=rows.filter(r=>r.status==='unfilled').length,reserved=rows.filter(r=>r.status==='reserved').length;
+    alertBox(`${draft.changed?'5일 순환 편성 완료':'기존 계획 유지 (변경 없음)'}: 예정 ${rows.filter(r=>r.status==='assigned').length}조 · 기존 예약 ${reserved}개 시간대 · 미배정 ${unfilled}개 시간대. ${unfilled?'미배정은 직접 확인해 주세요.':'저장 전 확인해 주세요.'}`,!!unfilled);
+  }
+  function statsHtml() {
+    const people=draft.members.map(name=>({name,am:0,pm:0,drive:0,comp:0}));
+    for(const r of draft.rows||[]) if(['assigned','recovered'].includes(effectiveStatus(r)))for(const role of ['driver','companion']){
+      const c=people.find(x=>x.name===r[role]);if(c){c[r.period==='AM'?'am':'pm']++;c[role==='driver'?'drive':'comp']++;}
+    }
+    return `<div class="overflow-x-auto"><table class="w-full text-xs border-collapse"><thead><tr class="bg-indigo-50 text-indigo-900"><th class="p-2 text-left">직원</th><th>오전</th><th>오후</th><th>운전</th><th>동행</th><th>합계</th></tr></thead><tbody>${people.map(s=>`<tr class="border-t"><td class="p-2 font-semibold">${text(s.name)}</td><td class="text-center">${s.am}</td><td class="text-center">${s.pm}</td><td class="text-center">${s.drive}</td><td class="text-center">${s.comp}</td><td class="text-center font-bold">${s.drive+s.comp}</td></tr>`).join('')}</tbody></table></div><p class="text-xs text-slate-500 mt-1">위 통계는 이 차량의 월간 계획만 표시하며, 자동편성 계산에는 다른 기존 예약도 반영합니다.</p>`;
+  }
+  const selectHtml=(idx,role,r) => {
+    const values=role==='driver'?draft.drivers:draft.members;
+    return `<select aria-label="${role==='driver'?'운전자':'동행자'} 선택" onchange="monthlyAutoDispatch.edit(${idx},'${role}',this.value)" class="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold bg-white"><option value="">미배정</option>${values.map(n=>`<option value="${text(n)}" ${r[role]===n?'selected':''}>${text(n)}</option>`).join('')}</select>`;
+  };
+  function renderRules(){
+    if(!draft)return;
+    el('monthlyWeeklyList').innerHTML=(draft.weeklyRules||[]).map((r,i)=>`<span class="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1.5 text-xs font-semibold">매주 ${WEEK_NAMES[r.weekday]}요일 ${PERIOD_NAMES[r.period]} · ${text(r.reason||'제외')} ${Number(r.weekday)===4&&r.period==='AM'?'<span class="text-violet-700">기본 고정</span>':`<button type="button" aria-label="반복 제외 삭제" onclick="monthlyAutoDispatch.removeWeekly(${i})" class="text-rose-700 font-extrabold">×</button>`}</span>`).join('')||'<span class="text-xs text-slate-500">등록된 반복 제외가 없습니다.</span>';
+    el('monthlySpecificList').innerHTML=(draft.specificExclusions||[]).map((r,i)=>`<span class="inline-flex items-center gap-2 bg-slate-100 border rounded-full px-3 py-1.5 text-xs font-semibold">${text(r.date)} ${PERIOD_NAMES[r.period]} · ${text(r.reason||'제외')} <button type="button" aria-label="특정 제외 삭제" onclick="monthlyAutoDispatch.removeSpecific(${i})" class="text-rose-700 font-extrabold">×</button></span>`).join('')||'<span class="text-xs text-slate-500">등록된 특정 날짜 제외가 없습니다.</span>';
+  }
+  function renderMonthlyPreview(){
+    if(!draft)return;
+    const issues=validateRows();
+    const assigned=draft.rows.filter(r=>['assigned','recovered'].includes(effectiveStatus(r))).length;
+    const expired=draft.rows.filter(r=>effectiveStatus(r)==='expired').length;
+    const confirmed=draft.rows.filter(r=>r.status==='confirmed'&&rowHasBooking(r,draft.vehicle)).length;
+    const unfilled=draft.rows.filter(r=>r.status==='unfilled').length;
+    const excluded=draft.rows.filter(r=>r.status==='excluded').length;
+    el('monthlyPlanStats').innerHTML=statsHtml();
+    el('monthlySummary').textContent=`${draft.month} · ${draft.vehicle} | 예정 ${assigned} / 확정 ${confirmed} / 만료 ${expired} / 제외 ${excluded} / 미배정 ${unfilled}조`;
+    el('monthlyRows').innerHTML=(draft.rows||[]).map((r,i)=>{
+      const date=new Date(r.date+'T12:00'),weekday=WEEK_NAMES[date.getDay()], status=effectiveStatus(r);
+      const editable=['assigned','unfilled','recovered'].includes(status);
+      const statusLabel={assigned:'예정',unfilled:'미배정',reserved:'기존 예약',excluded:`제외 (${r.reason||'설정'})`,expired:'자동 만료',recovered:'복구됨',deleted:'개별 삭제',confirmed:'배차 확정'}[status]||status;
+      const rowsDisabled=!editable;
+      const actions=[];
+      if(editable){
+        actions.push(`<label class="text-[11px] whitespace-nowrap"><input aria-label="고정 배차" type="checkbox" ${r.locked?'checked':''} onchange="monthlyAutoDispatch.lock(${i},this.checked)" /> 고정</label>`);
+        actions.push(`<button type="button" onclick="monthlyAutoDispatch.deleteRow(${i})" class="text-[11px] text-rose-700 underline">개별 삭제</button>`);
+        if(!draft.changed && status==='assigned')actions.push(`<button type="button" onclick="monthlyAutoDispatch.confirm('${r.date}','${r.period}',decodeURIComponent('${encodeURIComponent(draft.vehicle).replace(/'/g,'%27')}'))" class="text-[11px] bg-emerald-600 text-white rounded px-2 py-1">배차확정</button>`);
+        if(!draft.changed && status==='recovered')actions.push(`<button type="button" onclick="monthlyAutoDispatch.confirm('${r.date}','${r.period}',decodeURIComponent('${encodeURIComponent(draft.vehicle).replace(/'/g,'%27')}'))" class="text-[11px] bg-emerald-600 text-white rounded px-2 py-1">사후확정</button>`);
+      }else if(status==='expired'){actions.push(`<button type="button" class="text-[11px] bg-amber-600 text-white rounded px-2 py-1" onclick="monthlyAutoDispatch.restore(${i})">복구</button>`);actions.push(`<button type="button" onclick="monthlyAutoDispatch.deleteRow(${i})" class="text-[11px] text-rose-700 underline">개별 삭제</button>`);}
+      else if(status==='deleted')actions.push(`<button type="button" class="text-[11px] bg-slate-200 rounded px-2 py-1" onclick="monthlyAutoDispatch.undelete(${i})">다시 편성</button>`);
+      const bg=status==='excluded'?'bg-violet-50':status==='expired'?'bg-amber-50':status==='deleted'?'bg-rose-50':status==='reserved'?'bg-slate-100':'';
+      return `<tr class="border-t border-slate-200 ${bg}"><td class="px-2 py-2 whitespace-nowrap font-bold">${r.date.slice(5)} (${weekday})</td><td class="px-2 py-2 whitespace-nowrap">${PERIOD_NAMES[r.period]}</td><td class="p-1.5">${rowsDisabled?`<span class="text-slate-500 text-xs">${text(r.driver||'-')}</span>`:selectHtml(i,'driver',r)}</td><td class="p-1.5">${rowsDisabled?`<span class="text-slate-500 text-xs">${text(r.companion||'-')}</span>`:selectHtml(i,'companion',r)}</td><td class="px-2 py-2 text-xs text-slate-700"><div class="flex flex-wrap gap-2 items-center"><span>${text(statusLabel)}</span>${actions.join('')}</div></td></tr>`;
+    }).join('')||'<tr><td colspan="5" class="text-slate-500 p-6 text-center">월간 계획이 없습니다.</td></tr>';
+    el('monthlyExpiredRows').innerHTML=draft.rows.map((r,i)=>({r,i})).filter(({r})=>effectiveStatus(r)==='expired'&&r.driver&&r.companion).map(({r,i})=>`<div class="flex flex-wrap items-center justify-between bg-white p-2 border border-amber-200 rounded-lg gap-2"><span>${text(r.date)} ${PERIOD_NAMES[r.period]} · ${text(r.driver)} / ${text(r.companion)}</span><button type="button" onclick="monthlyAutoDispatch.restore(${i})" class="text-white font-bold bg-amber-600 px-3 py-1.5 rounded-lg">계획 복구</button></div>`).join('')||'복구할 만료 계획이 없습니다.';
+    renderRules();
+    const notices=issues.slice(0,4).join(' / ')+(issues.length>4?` 외 ${issues.length-4}건`:'');
+    el('monthlyValidation').textContent=issues.length?`검증 확인: ${notices}`:'검증 통과: 현재 확인된 연가·차량 예약과 겹치지 않습니다.';
+    el('monthlyValidation').className=issues.length?'text-xs font-bold text-rose-700':'text-xs font-bold text-emerald-700';
+    el('monthlySaveBtn').disabled=issues.length>0 || !draft.rows.length;
+    el('monthlySaveBtn').classList.toggle('opacity-50',issues.length>0||!draft.rows.length);
+  }
+  function editRow(i,role,value){
+    if(!draft?.rows[i] || !['assigned','unfilled','recovered'].includes(effectiveStatus(draft.rows[i])))return;
+    const row=draft.rows[i];row[role]=value;row.locked=true;
+    row.status=(row.driver&&row.companion)?(isPast(row)?'recovered':'assigned'):'unfilled';draft.changed=true;
+    renderMonthlyPreview();
+  }
+  function lockRow(i,on){if(!draft?.rows[i])return;draft.rows[i].locked=on;draft.changed=true;renderMonthlyPreview();}
+  function renderMemberChooser(){
+    const list=el('monthlyMemberChooser'), drivers=el('monthlyDriverChooser');
+    list.innerHTML=state.members.map(n=>`<label class="inline-flex items-center gap-1 text-xs px-2 py-1.5 bg-slate-100 rounded-lg border"><input type="checkbox" class="monthly-member" value="${text(n)}" ${draft.members.includes(n)?'checked':''} onchange="monthlyAutoDispatch.settingsChanged()">${text(n)}</label>`).join('');
+    drivers.innerHTML=state.members.map(n=>`<label class="inline-flex items-center gap-1 text-xs px-2 py-1.5 bg-blue-50 rounded-lg border"><input type="checkbox" class="monthly-driver" value="${text(n)}" ${draft.drivers.includes(n)?'checked':''} onchange="monthlyAutoDispatch.settingsChanged()">${text(n)}</label>`).join('');
+  }
+  function settingsChanged(){if(!draft)return;const before=JSON.stringify([draft.members,draft.drivers,draft.manualHolidays,draft.usePublicHolidays]);draft.members=[...document.querySelectorAll('.monthly-member:checked')].map(x=>x.value);draft.drivers=[...document.querySelectorAll('.monthly-driver:checked')].map(x=>x.value).filter(n=>draft.members.includes(n));draft.manualHolidays=parseDates(el('monthlyOffDays').value);draft.usePublicHolidays=el('monthlyUsePublicHolidays').checked;if(before!==JSON.stringify([draft.members,draft.drivers,draft.manualHolidays,draft.usePublicHolidays]))draft.changed=true;renderMonthlyPreview();}
+  function addWeekly(){
+    if(!draft)return;
+    const weekday=Number(el('monthlyWeekday').value),period=el('monthlyWeekPeriod').value,reason=el('monthlyWeekReason').value.trim()||'정기 제외';
+    if(![1,2,3,4,5].includes(weekday)||!['AM','PM','ALL'].includes(period))return;
+    draft.weeklyRules=(draft.weeklyRules||[]).filter(r=>!(r.weekday===weekday&&r.period===period));
+    draft.weeklyRules.push({weekday,period,reason});draft.changed=true;renderMonthlyPreview();
+  }
+  function removeWeekly(index){if(!draft)return;const rule=draft.weeklyRules[index];if(Number(rule?.weekday)===4&&rule?.period==='AM'){alertBox('목요일 오전 기본 제외는 해제할 수 없습니다.');return;}draft.weeklyRules.splice(index,1);draft.changed=true;renderMonthlyPreview();}
+  function addSpecific(){
+    if(!draft)return;
+    const date=el('monthlySpecificDate').value,period=el('monthlySpecificPeriod').value,reason=el('monthlySpecificReason').value.trim()||'일정 제외';
+    if(!validDateInMonth(date,draft.month)){alertBox('선택한 배차 월에 속한 정확한 날짜를 입력해 주세요.',true);return;}
+    draft.specificExclusions=(draft.specificExclusions||[]).filter(r=>!(r.date===date&&r.period===period));
+    draft.specificExclusions.push({date,period,reason});draft.changed=true;renderMonthlyPreview();
+  }
+  function removeSpecific(i){if(!draft)return;draft.specificExclusions.splice(i,1);draft.changed=true;renderMonthlyPreview();}
+  async function readWeekly(vehicle){
+    let item=null;
+    if(activeSyncMode==='RTDB'&&rtdbRef){const snap=await rtdbRef.parent.child('monthlyPlanSettings').child(vehicleKey(vehicle)).once('value');item=snap.val();}
+    else if(activeSyncMode==='FIRESTORE'&&firestoreDocRef){const snap=await firebaseApp.firestore().collection('monthlyDispatchSettings').doc(vehicleKey(vehicle)).get();item=snap.exists?snap.data():null;}
+    else{const all=JSON.parse(localStorage.getItem(RULE_KEY)||'{}');item=all[vehicle]||null;}
+    return item&&Array.isArray(item.rules)?item.rules:JSON.parse(JSON.stringify(DEFAULT_WEEKLY));
+  }
+  async function persistWeekly(vehicle,rules){
+    const doc={rules:JSON.parse(JSON.stringify(rules)),updatedAt:new Date().toISOString()};
+    if(activeSyncMode==='RTDB'&&rtdbRef)await rtdbRef.parent.child('monthlyPlanSettings').child(vehicleKey(vehicle)).set(doc);
+    else if(activeSyncMode==='FIRESTORE'&&firestoreDocRef)await firebaseApp.firestore().collection('monthlyDispatchSettings').doc(vehicleKey(vehicle)).set(doc);
+    else{const all=JSON.parse(localStorage.getItem(RULE_KEY)||'{}');all[vehicle]=doc;localStorage.setItem(RULE_KEY,JSON.stringify(all));}
+  }
+  async function saveWeekly(){
+    if(!draft)return;
+    try{await persistWeekly(draft.vehicle,draft.weeklyRules);alertBox('선택 차량의 반복 제외 규칙을 저장했습니다. 다음 달에도 적용됩니다. 이번 달 계획은 재생성 후 별도로 저장해 주세요.');}
+    catch(e){alertBox('반복 규칙 저장 실패: '+e.message,true);}
+  }
+  function deleteRow(i){
+    const r=draft?.rows[i];if(!r||!['assigned','unfilled','recovered','expired'].includes(effectiveStatus(r)))return;
+    if(!confirm(`${r.date} ${PERIOD_NAMES[r.period]} 월간 계획만 삭제할까요? 실제 차량 예약은 삭제하지 않습니다.`))return;
+    r.status='deleted';r.driver='';r.companion='';r.locked=true;r.bookingId=null;draft.changed=true;renderMonthlyPreview();
+    alertBox('개별 계획이 삭제 표시되었습니다. [월간 계획 저장]을 눌러야 저장됩니다.');
+  }
+  function undelete(i){const r=draft?.rows[i];if(!r||r.status!=='deleted')return;r.status='unfilled';r.locked=false;draft.changed=true;renderMonthlyPreview();alertBox('해당 시간대를 미배정 상태로 되돌렸습니다. 자동배차 재생성 후 저장하세요.');}
+  function resetPreview(){if(!draft)return;if(draft.rows.length&&!confirm('현재 미리보기 편성을 모두 초기화할까요? 서버의 저장된 계획은 삭제되지 않습니다.'))return;draft.rows=[];draft.changed=true;renderMonthlyPreview();alertBox('화면의 미리보기만 초기화했습니다. 저장된 월간 계획은 유지됩니다.');}
+  function restore(i){
+    const r=draft?.rows[i];if(!r||effectiveStatus(r)!=='expired'||!r.driver||!r.companion)return;
+    if(!confirm(`${r.date} ${PERIOD_NAMES[r.period]} 계획을 복구할까요? 지난 날짜라도 복구 상태로 보관되며, 실제 배차를 확정하려면 별도 저장이 필요합니다.`))return;
+    r.status='recovered';r.recoveredAt=new Date().toISOString();r.locked=true;draft.changed=true;
+    renderMonthlyPreview();alertBox('계획을 복구했습니다. [월간 계획 저장]을 눌러 복구 상태를 저장하세요.');
+  }
+  async function deleteMonthlyPlan(){
+    if(!draft)return;
+    const month=draft.month,vehicle=draft.vehicle;
+    if(!confirm(`${month} ${vehicle}의 저장된 월간 계획만 모두 삭제할까요?
+다른 차량의 계획, 반복 제외 규칙, 실제 배차·연가 기록은 유지됩니다.`))return;
+    try{
+      const current=await readMonth(month),saved=current.plans.find(p=>p.vehicle===vehicle);
+      if((saved?.updatedAt||null)!==savedRevision)throw new Error('다른 사용자가 변경했습니다. 다시 불러와 주세요.');
+      if(current.mode==='RTDB'){
+        const ref=rtdbRef.parent.child('monthlyPlans').child(month).child(vehicleKey(vehicle));
+        const result=await ref.transaction(old=>{
+          // 첫 시도에는 서버 값을 아직 모르는 상태(null)로 시작합니다. 이때 중단하지 말고 서버의 실제 값으로 재시도하게 둡니다.
+          if(old===null)return null;
+          // 서버의 실제 값이 확인된 뒤에만 버전을 비교합니다.
+          if((old.updatedAt||null)!==savedRevision)return;
+          return null;
+        },undefined,false);
+        if(!result.committed)throw new Error('서버의 계획이 그 사이에 변경되었습니다. [저장된 계획 다시 불러오기] 후 다시 시도해 주세요.');
+      }else if(current.mode==='FIRESTORE'){
+        await firebaseApp.firestore().runTransaction(async tx=>{const ref=firebaseApp.firestore().collection('monthlyDispatchPlans').doc(month+'_'+vehicleKey(vehicle));const snap=await tx.get(ref);if((snap.exists?(snap.data().updatedAt||null):null)!==savedRevision)throw new Error('다른 사용자가 먼저 변경했습니다.');tx.delete(ref);});
+      }else{
+        const items=JSON.parse(localStorage.getItem(LOCAL_KEY)||'{}');delete items[month+'|'+vehicle];localStorage.setItem(LOCAL_KEY,JSON.stringify(items));
+      }
+      savedRevision=null;savedPlansInMonth=savedPlansInMonth.filter(p=>p.vehicle!==vehicle);
+      calendarCache.set(month,savedPlansInMonth);
+      window.monthlyAutoDispatch.currentSavedPlan=null;
+      const rules=JSON.parse(JSON.stringify(draft.weeklyRules||DEFAULT_WEEKLY));
+      draft={month,vehicle,members:[...state.members],drivers:[...state.members],manualHolidays:[],specificExclusions:[],weeklyRules:rules,usePublicHolidays:true,rows:[],changed:false};
+      el('monthlyOffDays').value='';el('monthlyUsePublicHolidays').checked=true;
+      renderMemberChooser();renderMonthlyPreview();renderCalendar();
+      alertBox('월간 계획만 삭제되었습니다. 실제 차량 예약과 반복 제외 규칙은 그대로 유지됩니다.');
+    }catch(e){alertBox('삭제 실패: '+e.message,true);}
+  }
+  async function toggleHolidays(){
+    if(!draft)return;
+    settingsChanged();
+    if(draft.usePublicHolidays){
+      alertBox('공휴일 정보를 조회하고 있습니다.');
+      await fetchHolidays(draft.month);
+      if(!holidayReady)alertBox('공휴일 조회가 실패했습니다. 공휴일을 직접 입력하고 자동 제외 옵션을 해제해 주세요.',true);
+    }else {holidayData=new Set();holidayReady=true;}
+    renderMonthlyPreview();
+  }
+  function saveLocal(plan){let items={};try{items=JSON.parse(localStorage.getItem(LOCAL_KEY)||'{}');}catch(e){}items[plan.month+'|'+plan.vehicle]=plan;localStorage.setItem(LOCAL_KEY,JSON.stringify(items));}
+  function readLocal(month){let items={};try{items=JSON.parse(localStorage.getItem(LOCAL_KEY)||'{}');}catch(e){}return Object.values(items).filter(x=>x&&x.month===month);}
+  async function readMonth(month){
+    if(rtdbRef && activeSyncMode==='RTDB'){
+      const s=await rtdbRef.parent.child('monthlyPlans').child(month).once('value');
+      return {mode:'RTDB',plans:Object.values(s.val()||{})};
+    }
+    if(firestoreDocRef && activeSyncMode==='FIRESTORE'){
+      const q=await firebaseApp.firestore().collection('monthlyDispatchPlans').where('month','==',month).get();
+      return {mode:'FIRESTORE',plans:q.docs.map(d=>d.data())};
+    }
+    return {mode:'LOCAL',plans:readLocal(month)};
+  }
+  async function fetchHolidays(month){
+    holidayReady=false;holidayData=new Set();
+    if(!el('monthlyUsePublicHolidays').checked){holidayReady=true;return;}
+    try{
+      const y=month.slice(0,4); const controller=new AbortController();const t=setTimeout(()=>controller.abort(),5000);
+      let resp;try{resp=await fetch(`https://date.nager.at/api/v3/PublicHolidays/${y}/KR`,{signal:controller.signal});}finally{clearTimeout(t);}
+      if(!resp.ok)throw new Error('holiday service unavailable');
+      const data=await resp.json();if(!Array.isArray(data))throw new Error('invalid holiday response');
+      holidayData=new Set(data.map(x=>x.date).filter(d=>dateInMonth(d,month)));holidayReady=true;
+    }catch(e){holidayReady=false;}
+  }
+  async function openMonthlyAutoDispatch(){
+    const seq=++openingSeq, modal=el('monthlyAutoModal');
+    modal.classList.remove('hidden');modal.classList.add('flex');
+    el('monthlyVehicle').innerHTML=state.vehicles.map(v=>`<option value="${text(v)}">${text(v)}</option>`).join('');
+    const filter=el('vehicleFilter').value;
+    if(state.vehicles.includes(filter))el('monthlyVehicle').value=filter;
+    if(!el('monthlyMonth').value)el('monthlyMonth').value=`${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}`;
+    await loadMonthlyPlan(seq);
+  }
+  function closeMonthlyAutoDispatch(){openingSeq++;el('monthlyAutoModal').classList.add('hidden');el('monthlyAutoModal').classList.remove('flex');}
+  async function loadMonthlyPlan(seq=++openingSeq){
+    const month=el('monthlyMonth').value,vehicle=el('monthlyVehicle').value;
+    if(!validMonth(month)||!state.vehicles.includes(vehicle)){alertBox('배차 월과 차량을 선택하세요.',true);return;}
+    alertBox('월간 계획과 연가·공휴일 정보를 확인하고 있습니다.');
+    let response;
+    try{response=await readMonth(month);}catch(e){alertBox('서버의 월간 계획을 읽을 수 없습니다. 연결을 확인한 뒤 다시 시도해 주세요.',true);return;}
+    if(seq!==openingSeq)return;
+    cloudMode=response.mode;savedPlansInMonth=response.plans.filter(p=>p?.month===month&&p?.vehicle);
+    const current=savedPlansInMonth.find(p=>p.vehicle===vehicle);
+    savedRevision=current?.updatedAt||null;
+    draft=current?JSON.parse(JSON.stringify(current)):{month,vehicle,members:[...state.members],drivers:[...state.members],manualHolidays:[],specificExclusions:[],usePublicHolidays:true,rows:[]};
+    try{draft.weeklyRules=await readWeekly(vehicle);}catch(e){draft.weeklyRules=current?.weeklyRules||JSON.parse(JSON.stringify(DEFAULT_WEEKLY));alertBox('반복 제외 설정 조회 실패. 최근 저장값 또는 기본 목요일 오전 제외를 사용합니다.',true);}
+    draft.specificExclusions=Array.isArray(draft.specificExclusions)?draft.specificExclusions:[];
+    draft.changed=false;window.monthlyAutoDispatch.currentSavedPlan=current||null;draft.members=(draft.members||[]).filter(n=>state.members.includes(n));draft.drivers=(draft.drivers||[]).filter(n=>draft.members.includes(n));
+    draft.rows=Array.isArray(draft.rows)?draft.rows:[];
+    el('monthlyOffDays').value=(draft.manualHolidays||[]).join(', ');
+    el('monthlyUsePublicHolidays').checked=draft.usePublicHolidays!==false;
+    renderMemberChooser();await fetchHolidays(month);
+    if(seq!==openingSeq)return;
+    calendarCache.set(month,[...savedPlansInMonth]);
+    el('monthlySpecificDate').value=`${month}-01`;
+    renderMonthlyPreview();
+    if(!isLeaveReady())alertBox('연가 데이터가 아직 동기화되지 않았습니다. 자동배차 및 계획 저장은 제한됩니다.',true);
+    else if(!holidayReady && draft.usePublicHolidays)alertBox('공휴일 자동 조회에 실패했습니다. 공휴일·기관 휴무일을 아래에 직접 적고 자동 공휴일 제외 옵션을 끈 후 배차해 주세요.',true);
+    else alertBox(current?`저장된 계획을 불러왔습니다. (${cloudMode==='LOCAL'?'이 기기에만 저장됨':'서버 공유'})`:'새로운 월간 계획입니다. [자동배차 생성]을 눌러 주세요.');
+  }
+  function holidayWarning(){if(draft?.usePublicHolidays&&!holidayReady){alertBox('공휴일 조회가 실패했습니다. 정확한 휴일 제외를 위해 공휴일을 직접 입력하고 공휴일 자동 제외 옵션을 해제해 주세요.',true);return true;}return false;}
+  function handleGenerate(){
+    if(!draft)return;settingsChanged();if(holidayWarning())return;
+    // 정상 기존 배정은 그대로 유지하고 변경이 필요한 자리만 재생성합니다.
+    generateMonthlyPlan();
+  }
+  async function saveMonthlyPlan(){
+    if(!draft||holidayWarning())return;
+    settingsChanged();const issues=validateRows();if(issues.length){alertBox('저장 불가: '+issues.slice(0,3).join(' / '),true);return;}
+    const assigned=draft.rows.filter(r=>r.status==='assigned').length;
+    if(!draft.rows.length){alertBox('먼저 자동배차를 생성해 주세요.',true);return;}
+    const unfilled=draft.rows.filter(r=>r.status==='unfilled').length;
+    if(!confirm(`선택 차량 ${draft.vehicle}의 ${draft.month} 월간 계획을 저장할까요?\n편성 ${assigned}조, 미배정 ${unfilled}조.\n(실제 차량 예약은 생성하지 않습니다.)`))return;
+    el('monthlySaveBtn').disabled=true;
+    try {
+      const current=await readMonth(draft.month);const server=current.plans.find(p=>p.vehicle===draft.vehicle);
+      if((server?.updatedAt||null)!==savedRevision){alertBox('다른 PC에서 계획을 변경했습니다. [저장된 계획 다시 불러오기] 후 확인해 주세요.',true);return;}
+      // 다른 차량의 최신 계획도 다시 조회하여 중복을 최종 검증합니다.
+      savedPlansInMonth=current.plans.filter(p=>p?.month===draft.month&&p?.vehicle);
+      // 직전 확인 후 변경된 연가 및 실제 예약 재검증
+      const errors=validateRows();if(errors.length)throw new Error(errors.slice(0,2).join(' / '));
+      const plan={month:draft.month,vehicle:draft.vehicle,members:[...draft.members],drivers:[...draft.drivers],manualHolidays:[...draft.manualHolidays],weeklyRules:JSON.parse(JSON.stringify(draft.weeklyRules||[])),specificExclusions:JSON.parse(JSON.stringify(draft.specificExclusions||[])),usePublicHolidays:draft.usePublicHolidays,rows:draft.rows.map(r=>({...r})),updatedAt:new Date().toISOString()};
+      if(current.mode==='RTDB'){
+        const ref=rtdbRef.parent.child('monthlyPlans').child(plan.month).child(vehicleKey(plan.vehicle));
+        const transaction=await ref.transaction(old=>{
+          // 첫 시도(서버 값 미확인)는 중단하지 않고 서버의 실제 값으로 재시도하게 둡니다.
+          if(old===null)return plan;
+          if((old.updatedAt||null)!==savedRevision)return;
+          return plan;
+        },undefined,false);
+        if(!transaction.committed)throw new Error('다른 사용자가 먼저 변경했습니다. 다시 불러와 주세요.');
+      }else if(current.mode==='FIRESTORE'){
+        // Firestore도 트랜잭션으로 다른 PC의 동시 변경을 보호합니다.
+        await firebaseApp.firestore().runTransaction(async tx=>{const ref=firebaseApp.firestore().collection('monthlyDispatchPlans').doc(plan.month+'_'+vehicleKey(plan.vehicle));const snap=await tx.get(ref);if((snap.exists?(snap.data().updatedAt||null):null)!==savedRevision)throw new Error('다른 사용자가 먼저 수정했습니다.');tx.set(ref,plan);});
+      }else{saveLocal(plan);}
+      try{await persistWeekly(plan.vehicle,plan.weeklyRules);}catch(e){alertBox('월간 계획은 저장되었지만 반복 규칙 저장 실패: '+e.message,true);}
+      savedRevision=plan.updatedAt;draft.changed=false;
+      savedPlansInMonth=savedPlansInMonth.filter(p=>p.vehicle!==plan.vehicle).concat([plan]);
+      window.monthlyAutoDispatch.currentSavedPlan=plan;
+      calendarCache.set(plan.month,[...savedPlansInMonth]);
+      alertBox('월간 배차 계획이 저장되었습니다. 실제 차량 예약과는 별도로 관리됩니다.'+(current.mode==='LOCAL'?' (이 기기에만 저장됨)':''));
+      renderMonthlyPreview();renderCalendar();
+    }catch(e){alertBox('계획 저장 실패: '+e.message,true);}finally{renderMonthlyPreview();}
+  }
+  async function deleteCalendarRow(date,period,vehicle){
+    if(!validDateInMonth(date,date.slice(0,7))||!['AM','PM'].includes(period)||!state.vehicles.includes(vehicle))return;
+    if(draft?.changed&&draft.month===date.slice(0,7)&&draft.vehicle===vehicle){alert('월간 계획에 저장되지 않은 변경 사항이 있습니다. 먼저 저장하거나 다시 불러오세요.');return;}
+    if(!confirm(`${date} ${PERIOD_NAMES[period]}의 월간 계획만 삭제할까요? 실제 차량 예약은 삭제되지 않습니다.`))return;
+    const month=date.slice(0,7),key=month+'_'+vehicleKey(vehicle);
+    try{
+      const target=await readMonth(month),plan=target.plans.find(p=>p.vehicle===vehicle);
+      const row=plan?.rows?.find(r=>r.date===date&&r.period===period);
+      if(!row||!['assigned','recovered'].includes(effectiveStatus(row)))throw new Error('계획이 이미 변경되었거나 삭제할 수 없는 상태입니다.');
+      const revision=plan.updatedAt||null;
+      const updated=JSON.parse(JSON.stringify(plan)),item=updated.rows.find(r=>r.date===date&&r.period===period);
+      item.status='deleted';item.driver='';item.companion='';item.locked=true;item.bookingId=null;
+      updated.updatedAt=new Date().toISOString();
+      if(target.mode==='RTDB'){
+        const ref=rtdbRef.parent.child('monthlyPlans').child(month).child(vehicleKey(vehicle));
+        const result=await ref.transaction(old=>{
+          if(old===null)return null; // 첫 시도(서버 값 미확인)는 중단하지 않고 서버의 실제 값으로 재시도
+          if((old.updatedAt||null)!==revision)return;
+          const current=old.rows?.find(r=>r.date===date&&r.period===period);
+          if(!current||!['assigned','recovered'].includes(current.status))return;
+          const copy=JSON.parse(JSON.stringify(old)),r=copy.rows.find(r=>r.date===date&&r.period===period);
+          r.status='deleted';r.driver='';r.companion='';r.locked=true;r.bookingId=null;copy.updatedAt=updated.updatedAt;return copy;
+        },undefined,false);
+        if(!result.committed)throw new Error('다른 사용자가 계획을 변경했습니다. 달력을 새로고침해 주세요.');
+      }else if(target.mode==='FIRESTORE'){
+        await firebaseApp.firestore().runTransaction(async tx=>{
+          const ref=firebaseApp.firestore().collection('monthlyDispatchPlans').doc(key);
+          const snap=await tx.get(ref);if(!snap.exists||(snap.data().updatedAt||null)!==revision)throw new Error('다른 사용자가 먼저 계획을 변경했습니다.');
+          tx.set(ref,updated);
+        });
+      }else{
+        const latest=readLocal(month).find(p=>p.vehicle===vehicle);
+        if((latest?.updatedAt||null)!==revision)throw new Error('계획이 변경되었습니다.');
+        saveLocal(updated);
+      }
+      calendarCache.delete(month);await ensureCalendar(month);
+      if(draft?.month===month&&draft?.vehicle===vehicle&&!draft.changed)await loadMonthlyPlan();
+      showCarToast('선택 시간대의 월간 계획만 삭제했습니다. 실제 예약은 유지됩니다.','success');
+    }catch(e){alert('월간 계획 삭제 실패: '+e.message);calendarCache.delete(month);await ensureCalendar(month);}
+  }
+  function exportMonthlyCSV(){
+    if(!draft||!draft.rows.length){alertBox('출력할 월간 계획이 없습니다.',true);return;}
+    const rows=[['날짜','구분','시작','종료','차량','운전자','동행자','상태','고정'],...draft.rows.map(r=>[r.date,r.period==='AM'?'오전':'오후',...TIMES[r.period],draft.vehicle,r.driver||'',r.companion||'',({reserved:'기존예약',unfilled:'미배정',excluded:'제외',deleted:'삭제',confirmed:'확정',expired:'만료',recovered:'복구',assigned:'편성'})[effectiveStatus(r)]||'기타',r.locked?'예':'아니오'])];
+    const csv='\uFEFF'+rows.map(a=>a.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`월간담당조_${draft.month}_${draft.vehicle.replace(/[^가-힣\w-]/g,'_')}.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function printMonthlyPlan(){
+    if(!draft?.rows.length){alertBox('출력할 계획이 없습니다.',true);return;}
+    const title=`${text(draft.month)} / ${text(draft.vehicle)} 월간 담당조 계획표`;
+    const rows=draft.rows.map(r=>`<tr><td>${text(r.date)}</td><td>${r.period==='AM'?'오전':'오후'}</td><td>${TIMES[r.period].join('~')}</td><td>${text(r.driver||'')}</td><td>${text(r.companion||'')}</td><td>${({reserved:'기존예약',unfilled:'미배정',excluded:'제외',deleted:'삭제',confirmed:'확정',expired:'만료',recovered:'복구',assigned:'편성'})[effectiveStatus(r)]||'기타'}</td></tr>`).join('');
+    el('monthlyPrintArea').innerHTML=`<h1 style="font-size:20px;font-weight:bold;text-align:center;margin-bottom:18px">${title}</h1><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th>날짜</th><th>구분</th><th>시간</th><th>운전자</th><th>동행자</th><th>상태</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:12px;font-size:11px">※ 자동 배차 담당조 계획으로 실제 차량 예약·출장기록과는 다릅니다.</p>`;
+    document.body.classList.add('printing-monthly');
+    const after=()=>{document.body.classList.remove('printing-monthly');window.removeEventListener('afterprint',after);};
+    window.addEventListener('afterprint',after);
+    window.print();
+    setTimeout(after,1200);
+  }
+  async function ensureCalendar(month){
+    if(!validMonth(month)||calendarCache.has(month)||calendarLoading.has(month))return;
+    calendarLoading.add(month);
+    try{const response=await readMonth(month);calendarCache.set(month,response.plans.filter(p=>p?.vehicle));renderCalendar();}
+    catch(e){console.warn('월간 계획 달력 조회 실패:',e);}
+    finally{calendarLoading.delete(month);}
+  }
+  async function confirmPlanRow(date,period,vehicle){
+    if(!state.vehicles.includes(vehicle)){alert('차량이 팀원 목록에서 삭제되었습니다.');return;}
+    let plan;
+    try{
+      const fetched=await readMonth(date.slice(0,7));
+      calendarCache.set(date.slice(0,7),fetched.plans);
+      plan=fetched.plans.find(p=>p.vehicle===vehicle);
+    }catch(e){alert('월간 계획을 불러올 수 없습니다. 연결을 확인해 주세요.');return;}
+    const row=plan?.rows?.find(r=>r.date===date&&r.period===period);
+    if(!row||!['assigned','recovered'].includes(effectiveStatus(row))){alert('확정 가능한 계획이 아닙니다. 만료된 경우 먼저 [계획 복구] 후 저장해 주세요.');return;}
+    if(!row.driver||!row.companion||row.driver===row.companion){alert('운전자와 동행자를 확인해 주세요.');return;}
+    if(reservationFor(vehicle,date,period)){alert('해당 차량 시간대에 이미 실제 배차가 등록되어 있습니다.');return;}
+    if(!window.crossScheduleAlerts?.leaveReady){alert('연가 데이터가 준비되지 않아 확정할 수 없습니다.');return;}
+    const bridge=window.crossScheduleAlerts;
+    for(const n of [row.driver,row.companion]){
+      const emp=bridge.employees.find(e=>normalized(e.name)===normalized(n));
+      if(!emp||bridge.leaveRecords.some(r=>r.empId===emp.id&&bridge.isAbsence(r.leaveType)&&bridge.overlaps(r,{date,startTime:TIMES[period][0],endTime:TIMES[period][1]}))){alert(n+' 직원의 연가·휴무와 겹치거나 명단이 일치하지 않습니다.');return;}
+      if(Object.values(state.bookings||{}).some(b=>b.date===date&&people(b).some(x=>normalized(x)===normalized(n)))){alert(n+' 직원이 같은 날짜의 수동 배차에 이미 등록되어 있습니다. 자동배차 확정은 하루 1회만 가능합니다.');return;}
+      if(plan && (calendarCache.get(date.slice(0,7))||[]).some(p=>p.vehicle!==vehicle&&(p.rows||[]).some(other=>other.date===date&&['assigned','recovered'].includes(effectiveStatus(other))&&[other.driver,other.companion].some(x=>normalized(x)===normalized(n))))){alert(n+' 직원이 같은 날 다른 차량의 월간 계획에 이미 등록되어 있습니다.');return;}
+    }
+    if(draft?.changed&&draft.vehicle===vehicle&&draft.month===plan.month){alert('현재 화면에 저장하지 않은 변경이 있습니다. 먼저 월간 계획을 저장하거나 불러오세요.');return;}
+    closeMonthlyAutoDispatch();
+    openBookingModal(date);
+    el('bookingVehicle').value=vehicle;
+    el('bookingDriver').value=row.driver;
+    document.querySelector(`input[name="meridiem"][value="${period}"]`).checked=true;
+    updateDefaultTime(period);
+    renderCompanionCheckboxes(row.driver,[row.companion]);
+    pendingConfirm={month:date.slice(0,7),vehicle,date,period,driver:row.driver,companion:row.companion};
+    el('modalTitle').innerHTML='<i class="fa-solid fa-check-circle text-emerald-600"></i> 월간 계획에서 실제 배차 확정';
+    showCarToast('담당조가 입력되었습니다. 행선지·출장 내용을 확인한 후 저장해 주세요.','info');
+  }
+  const reservationFor=(vehicle,date,period)=>Object.values(state.bookings||{}).find(b=>b.date===date&&b.vehicle===vehicle&&overlap(...TIMES[period],b.startTime,b.endTime));
+  function linkForBooking(b){
+    if(!pendingConfirm)return null;
+    const p=pendingConfirm;
+    if(b.date!==p.date||b.vehicle!==p.vehicle||b.meridiem!==p.period||normalized(b.driver)!==normalized(p.driver)||!b.companions?.some(n=>normalized(n)===normalized(p.companion))||!overlap(...TIMES[p.period],b.startTime,b.endTime))return null;
+    return {month:p.month,vehicle:p.vehicle,date:p.date,period:p.period};
+  }
+  async function finalizeConfirmed(booking){
+    const link=booking?.monthlyPlanRef;if(!link)return;
+    const month=link.month,vehicle=link.vehicle;
+    if(activeSyncMode==='RTDB'&&rtdbRef){
+      const ref=rtdbRef.parent.child('monthlyPlans').child(month).child(vehicleKey(vehicle));
+      const tx=await ref.transaction(old=>{
+        if(old===null)return null; // 첫 시도(서버 값 미확인)는 중단하지 않고 서버의 실제 값으로 재시도
+        if(!old.rows)return;
+        const row=old.rows.find(r=>r.date===link.date&&r.period===link.period);
+        if(!row||!['assigned','recovered','confirmed'].includes(row.status))return;
+        row.status='confirmed';row.bookingId=booking.id;row.confirmedAt=new Date().toISOString();old.updatedAt=new Date().toISOString();return old;
+      },undefined,false);
+      if(!tx.committed||!tx.snapshot?.val()?.rows)throw new Error('월간 계획 갱신 충돌');
+    }else{
+      const response=await readMonth(month),plan=response.plans.find(p=>p.vehicle===vehicle);
+      if(!plan)throw new Error('월간 계획이 존재하지 않습니다.');
+      const row=plan.rows.find(r=>r.date===link.date&&r.period===link.period);
+      if(!row)throw new Error('월간 배차 편성을 찾지 못했습니다.');
+      row.status='confirmed';row.bookingId=booking.id;row.confirmedAt=new Date().toISOString();plan.updatedAt=new Date().toISOString();
+      if(response.mode==='FIRESTORE')await firebaseApp.firestore().collection('monthlyDispatchPlans').doc(month+'_'+vehicleKey(vehicle)).set(plan);
+      else saveLocal(plan);
+    }
+    calendarCache.delete(month);await ensureCalendar(month);
+    if(draft?.month===month&&draft.vehicle===vehicle&&!draft.changed)await loadMonthlyPlan();
+  }
+  function clearPendingConfirm(){pendingConfirm=null;}
+  async function allPlansForBackup(){
+    if(rtdbRef && activeSyncMode==='RTDB') {const snap=await rtdbRef.parent.child('monthlyPlans').once('value');return snap.val()||{};}
+    if(firestoreDocRef && activeSyncMode==='FIRESTORE') {const snap=await firebaseApp.firestore().collection('monthlyDispatchPlans').get();return snap.docs.map(d=>d.data());}
+    return JSON.parse(localStorage.getItem(LOCAL_KEY)||'{}');
+  }
+  async function leavePlanConflicts(leave){
+    const bridge=window.crossScheduleAlerts;if(!bridge.isAbsence(leave.leaveType))return [];
+    const dates=bridge.dateBounds(leave.dateStr||leave.date);if(!dates)return [];
+    const start=new Date(dates.start+'T12:00'),end=new Date(dates.end+'T12:00');
+    const months=[];let y=start.getFullYear(),m=start.getMonth();let safety=0;
+    while((y<end.getFullYear()||(y===end.getFullYear()&&m<=end.getMonth()))&&safety++<15){months.push(`${y}-${String(m+1).padStart(2,'0')}`);m++;if(m===12){y++;m=0;}}
+    const results=[];
+    for(const month of months){const data=await readMonth(month);for(const p of data.plans){for(const r of p.rows||[]){
+      if(!['assigned','recovered'].includes(effectiveStatus(r))||![r.driver,r.companion].some(n=>normalized(n)===normalized(leave.employeeName)))continue;
+      if(!bridge.overlaps(leave,{date:r.date,startTime:TIMES[r.period][0],endTime:TIMES[r.period][1]}))continue;
+      results.push(`${leave.employeeName} · ${r.date} ${r.period==='AM'?'오전':'오후'} · ${p.vehicle} 월간 담당조 계획 (${r.driver} / ${r.companion})`);
+    }}}
+    return results;
+  }
+  const publicApi={open:openMonthlyAutoDispatch,close:closeMonthlyAutoDispatch,load:()=>loadMonthlyPlan(),generate:handleGenerate,settingsChanged,toggleHolidays,edit:editRow,lock:lockRow,save:saveMonthlyPlan,exportCSV:exportMonthlyCSV,print:printMonthlyPlan,allPlansForBackup,
+    addWeekly,removeWeekly,addSpecific,removeSpecific,saveWeekly,deleteRow,undelete,deleteCalendarRow,deletePlan:deleteMonthlyPlan,resetPreview,restore,confirm:confirmPlanRow,finalizeConfirmed,linkForBooking,clearPendingConfirm,ensureCalendar,invalidateCalendar(){calendarCache.clear();},
+    currentSavedPlan:null,
+    calendarBadge(date,filter){
+      const plans=calendarCache.get(date.slice(0,7))||[];
+      return plans.filter(p=>filter==='ALL'||p.vehicle===filter).flatMap(p=>(p.rows||[]).filter(r=>r.date===date).map(r=>{
+        const status=effectiveStatus(r);
+        if(!['assigned','recovered','excluded'].includes(status))return '';
+        const label=PERIOD_NAMES[r.period];
+        if(status==='excluded')return `<div class="mt-1 rounded-md border border-slate-200 bg-slate-100 text-slate-600 px-1 py-1 text-[11px]">🚫 ${filter==='ALL'?text(p.vehicle)+' ':''}${label} 배차 제외 (${text(r.reason||'일정')})</div>`;
+        return `<div class="mt-1 rounded-md border ${status==='recovered'?'border-amber-300 bg-amber-50 text-amber-950':'border-violet-200 bg-violet-50 text-violet-900'} px-1 py-1 text-[11px] font-semibold">📋 ${filter==='ALL'?text(p.vehicle)+' ':''}${label}: ${text(r.driver)} / ${text(r.companion)} <button type="button" onclick="monthlyAutoDispatch.confirm('${r.date}','${r.period}',decodeURIComponent('${encodeURIComponent(p.vehicle).replace(/'/g,'%27')}'))" class="ml-1 px-1.5 py-0.5 text-white bg-emerald-600 hover:bg-emerald-700 rounded">${status==='recovered'?'사후확정':'배차확정'}</button> <button type="button" onclick="monthlyAutoDispatch.deleteCalendarRow('${r.date}','${r.period}',decodeURIComponent('${encodeURIComponent(p.vehicle).replace(/'/g,'%27')}'))" class="ml-1 px-1.5 py-0.5 text-rose-700 bg-white border border-rose-200 rounded">계획 삭제</button></div>`;
+      })).join('');
+    }
+  };
+  window.monthlyAutoDispatch=publicApi;
+  let lastCheckedDate=todayKorea();
+  setInterval(()=>{const now=todayKorea();if(now!==lastCheckedDate){lastCheckedDate=now;renderCalendar();if(draft)renderMonthlyPreview();}},60000);
+  // 신규 연가 등록 시, 실제 예약뿐 아니라 이미 저장된 월간 담당조 계획도 확인
+  const originalConfirmLeave=window.crossScheduleAlerts.confirmLeave.bind(window.crossScheduleAlerts);
+  window.crossScheduleAlerts.confirmLeave=async function(leave,action='등록'){
+    const existing=this.checkLeave(leave);
+    try{existing.matches.push(...await leavePlanConflicts(leave));}
+    catch(e){existing.unavailable=[existing.unavailable,'월간 담당조 계획의 중복 여부를 확인할 수 없습니다.'].filter(Boolean).join(' ');}
+    return this.confirmIfNeeded(existing,action);
+  };
+  // 월 이동 시 현재 차량의 저장 계획만 표시; 최근 열었던 차량/월의 미리보기와 혼동하지 않도록 동기화
+})();
+
+</script>
 <!-- =================================================================
        [텔레그램 일일 일정 브리핑 및 자동알람 설정 모달]
        ================================================================= -->
@@ -5550,7 +6308,8 @@
           ]);
           const backupObj = {
             backupDate: new Date().toISOString(),
-            carDispatchData: window.state || {},
+            carDispatchData: typeof state !== "undefined" ? state : {},
+            monthlyAutoPlans: window.monthlyAutoDispatch ? await window.monthlyAutoDispatch.allPlansForBackup().catch(() => ({ warning: "월간 계획을 읽지 못했습니다" })) : {},
             leaveEmployees: empRes.documents || [],
             leaveRecords: recRes.documents || []
           };
